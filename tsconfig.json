@@ -20,7 +20,7 @@
     "downlevelIteration": true,
     "paths": {
       "components/*": [
-        "src/components/*"
+        "src/app/components/*"
       ]
     }
   },
