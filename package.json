@@ -10,8 +10,8 @@
     "server": "node ./src/server/index.js",
     "dev": "concurrently \"npm run server\" \"npm run develop\"",
     "build": "webpack --mode=production --env production --progress",
-    "lint": "eslint './src/**/*.{ts,tsx,js,jsx}'",
-    "lint:fix": "eslint './src/**/*.{ts,tsx,js,jsx}' --fix"
+    "lint": "eslint './src/app/**/*.{ts,tsx,js,jsx}'",
+    "lint:fix": "eslint './src/app/**/*.{ts,tsx,js,jsx}' --fix"
   },
   "devDependencies": {
     "@types/node": "22.15.22",
