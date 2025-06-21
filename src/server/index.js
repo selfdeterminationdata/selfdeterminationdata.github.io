@@ -16,6 +16,7 @@ app.get("/", (request, response) => {
 });
 
 app.get("/group/700010", mock.getGroupByID);
+app.get("/group/geom/101010", mock.getGroupGeom);
 
 app.listen(port, () => {
     console.log(`App running on port ${port}.`);
