@@ -5,6 +5,7 @@ const group = {
         'violent': false,
         'ccode': 700
     }
+
 const geom = { 
         "type": "MultiPolygon", 
         "coordinates": [ 
@@ -275,6 +276,673 @@ const geom = {
     }
 
 
+const countries = [
+    {
+        "ccode": 681,
+        "countryName": "Aden"
+    },{
+        "ccode": 700,
+        "countryName": "Afghanistan"
+    },{
+        "ccode": 339,
+        "countryName": "Albania"
+    },{
+        "ccode": 651,
+        "countryName": "Algeria"
+    },{
+        "ccode": 540,
+        "countryName": "Angola"
+    },{
+        "ccode": 58,
+        "countryName": "Antigua and Barbuda"
+    },{
+        "ccode": 160,
+        "countryName": "Argentina"
+    },{
+        "ccode": 371,
+        "countryName": "Armenia"
+    },{
+        "ccode": 900,
+        "countryName": "Australia"
+    },{
+        "ccode": 305,
+        "countryName": "Austria"
+    },{
+        "ccode": 373,
+        "countryName": "Azerbaijan"
+    },{
+        "ccode": 31,
+        "countryName": "Bahamas"
+    },{
+        "ccode": 692,
+        "countryName": "Bahrain"
+    },{
+        "ccode": 771,
+        "countryName": "Bangladesh"
+    },{
+        "ccode": 53,
+        "countryName": "Barbados"
+    },{
+        "ccode": 370,
+        "countryName": "Belarus (Byelorussia)"
+    },{
+        "ccode": 211,
+        "countryName": "Belgium"
+    },{
+        "ccode": 80,
+        "countryName": "Belize"
+    },{
+        "ccode": 434,
+        "countryName": "Benin"
+    },{
+        "ccode": 760,
+        "countryName": "Bhutan"
+    },{
+        "ccode": 145,
+        "countryName": "Bolivia"
+    },{
+        "ccode": 346,
+        "countryName": "Bosnia-Herzegovina"
+    },{
+        "ccode": 140,
+        "countryName": "Brazil"
+    },{
+        "ccode": 472,
+        "countryName": "British Cameroons"
+    },{
+        "ccode": 521,
+        "countryName": "British Somaliland (Somaliland Republic)"
+    },{
+        "ccode": 462,
+        "countryName": "British Togoland"
+    },{
+        "ccode": 835,
+        "countryName": "Brunei"
+    },{
+        "ccode": 355,
+        "countryName": "Bulgaria"
+    },{
+        "ccode": 439,
+        "countryName": "Burkina Faso (Upper Volta)"
+    },{
+        "ccode": 516,
+        "countryName": "Burundi"
+    },{
+        "ccode": 811,
+        "countryName": "Cambodia (Kampuchea)"
+    },{
+        "ccode": 471,
+        "countryName": "Cameroon"
+    },{
+        "ccode": 20,
+        "countryName": "Canada"
+    },{
+        "ccode": 402,
+        "countryName": "Cape Verde"
+    },{
+        "ccode": 482,
+        "countryName": "Central African Republic"
+    },{
+        "ccode": 483,
+        "countryName": "Chad"
+    },{
+        "ccode": 155,
+        "countryName": "Chile"
+    },{
+        "ccode": 710,
+        "countryName": "China"
+    },{
+        "ccode": 100,
+        "countryName": "Colombia"
+    },{
+        "ccode": 581,
+        "countryName": "Comoros"
+    },{
+        "ccode": 484,
+        "countryName": "Congo"
+    },{
+        "ccode": 490,
+        "countryName": "Congo, Democratic Republic of (Zaire)"
+    },{
+        "ccode": 94,
+        "countryName": "Costa Rica"
+    },{
+        "ccode": 437,
+        "countryName": "Cote D'Ivoire"
+    },{
+        "ccode": 344,
+        "countryName": "Croatia"
+    },{
+        "ccode": 40,
+        "countryName": "Cuba"
+    },{
+        "ccode": 352,
+        "countryName": "Cyprus"
+    },{
+        "ccode": 316,
+        "countryName": "Czech Republic"
+    },{
+        "ccode": 315,
+        "countryName": "Czechoslovakia"
+    },{
+        "ccode": 390,
+        "countryName": "Denmark"
+    },{
+        "ccode": 522,
+        "countryName": "Djibouti"
+    },{
+        "ccode": 42,
+        "countryName": "Dominican Republic"
+    },{
+        "ccode": 6812,
+        "countryName": "East Aden Protectorate"
+    },{
+        "ccode": 860,
+        "countryName": "East Timor"
+    },{
+        "ccode": 130,
+        "countryName": "Ecuador"
+    },{
+        "ccode": 651,
+        "countryName": "Egypt"
+    },{
+        "ccode": 92,
+        "countryName": "El Salvador"
+    },{
+        "ccode": 411,
+        "countryName": "Equatorial Guinea"
+    },{
+        "ccode": 531,
+        "countryName": "Eritrea"
+    },{
+        "ccode": 366,
+        "countryName": "Estonia"
+    },{
+        "ccode": 530,
+        "countryName": "Ethiopia"
+    },{
+        "ccode": 821,
+        "countryName": "Federated Malay States"
+    },{
+        "ccode": 550,
+        "countryName": "Federation of Rhodesia and Nyasaland"
+    },{
+        "ccode": 6801,
+        "countryName": "Federation of South Arabia"
+    },{
+        "ccode": 950,
+        "countryName": "Fiji"
+    },{
+        "ccode": 375,
+        "countryName": "Finland"
+    },{
+        "ccode": 220,
+        "countryName": "France"
+    },{
+        "ccode": 120,
+        "countryName": "French Guyana"
+    },{
+        "ccode": 960,
+        "countryName": "French Polynesia"
+    },{
+        "ccode": 481,
+        "countryName": "Gabon"
+    },{
+        "ccode": 420,
+        "countryName": "Gambia"
+    },{
+        "ccode": 6511,
+        "countryName": "Gaza"
+    },{
+        "ccode": 372,
+        "countryName": "Georgia"
+    },{
+        "ccode": 265,
+        "countryName": "German Democratic Republic"
+    },{
+        "ccode": 260,
+        "countryName": "German Federal Republic"
+    },{
+        "ccode": 255,
+        "countryName": "Germany (Prussia)"
+    },{
+        "ccode": 452,
+        "countryName": "Ghana"
+    },{
+        "ccode": 350,
+        "countryName": "Greece"
+    },{
+        "ccode": 65,
+        "countryName": "Guadeloupe"
+    },{
+        "ccode": 90,
+        "countryName": "Guatemala"
+    },{
+        "ccode": 438,
+        "countryName": "Guinea"
+    },{
+        "ccode": 404,
+        "countryName": "Guinea-Bissau"
+    },{
+        "ccode": 110,
+        "countryName": "Guyana"
+    },{
+        "ccode": 41,
+        "countryName": "Haiti"
+    },{
+        "ccode": 91,
+        "countryName": "Honduras"
+    },{
+        "ccode": 310,
+        "countryName": "Hungary"
+    },{
+        "ccode": 395,
+        "countryName": "Iceland"
+    },{
+        "ccode": 750,
+        "countryName": "India"
+    },{
+        "ccode": 850,
+        "countryName": "Indonesia"
+    },{
+        "ccode": 1201,
+        "countryName": "Inini"
+    },{
+        "ccode": 630,
+        "countryName": "Iran (Persia)"
+    },{
+        "ccode": 645,
+        "countryName": "Iraq"
+    },{
+        "ccode": 205,
+        "countryName": "Ireland"
+    },{
+        "ccode": 666,
+        "countryName": "Israel"
+    },{
+        "ccode": 5200,
+        "countryName": "Italian Somaliland"
+    },{
+        "ccode": 325,
+        "countryName": "Italy/Sardinia"
+    },{
+        "ccode": 51,
+        "countryName": "Jamaica"
+    },{
+        "ccode": 740,
+        "countryName": "Japan"
+    },{
+        "ccode": 663,
+        "countryName": "Jordan"
+    },{
+        "ccode": 705,
+        "countryName": "Kazakhstan"
+    },{
+        "ccode": 501,
+        "countryName": "Kenya"
+    },{
+        "ccode": 946,
+        "countryName": "Kiribati"
+    },{
+        "ccode": 730,
+        "countryName": "Korea"
+    },{
+        "ccode": 731,
+        "countryName": "Korea, People's Republic of"
+    },{
+        "ccode": 732,
+        "countryName": "Korea, Republic of"
+    },{
+        "ccode": 347,
+        "countryName": "Kosovo"
+    },{
+        "ccode": 690,
+        "countryName": "Kuwait"
+    },{
+        "ccode": 703,
+        "countryName": "Kyrgyz Republic"
+    },{
+        "ccode": 812,
+        "countryName": "Laos"
+    },{
+        "ccode": 367,
+        "countryName": "Latvia"
+    },{
+        "ccode": 130,
+        "countryName": "660"
+    },{
+        "ccode": 570,
+        "countryName": "Lesotho"
+    },{
+        "ccode": 450,
+        "countryName": "Liberia"
+    },{
+        "ccode": 620,
+        "countryName": "Libya"
+    },{
+        "ccode": 368,
+        "countryName": "Lithuania"
+    },{
+        "ccode": 212,
+        "countryName": "Luxembourg"
+    },{
+        "ccode": 343,
+        "countryName": "Macedonia (FYROM/North Macedonia)"
+    },{
+        "ccode": 580,
+        "countryName": "Madagascar (Malagasy)"
+    },{
+        "ccode": 553,
+        "countryName": "Malawi"
+    },{
+        "ccode": 820,
+        "countryName": "Malaysia"
+    },{
+        "ccode": 781,
+        "countryName": "Maldives"
+    },{
+        "ccode": 432,
+        "countryName": "Mali"
+    },{
+        "ccode": 338,
+        "countryName": "Malta"
+    },{
+        "ccode": 66,
+        "countryName": "Martinique"
+    },{
+        "ccode": 435,
+        "countryName": "Mauritania"
+    },{
+        "ccode": 490,
+        "countryName": "Mauritius"
+    },{
+        "ccode": 70,
+        "countryName": "Mexico"
+    },{
+        "ccode": 957,
+        "countryName": "Micronesia"
+    },{
+        "ccode": 359,
+        "countryName": "Moldova"
+    },{
+        "ccode": 712,
+        "countryName": "Mongolia"
+    },{
+        "ccode": 341,
+        "countryName": "Montenegro"
+    },{
+        "ccode": 600,
+        "countryName": "Morocco"
+    },{
+        "ccode": 541,
+        "countryName": "Mozambique"
+    },{
+        "ccode": 775,
+        "countryName": "Myanmar (Burma)"
+    },{
+        "ccode": 565,
+        "countryName": "Namibia"
+    },{
+        "ccode": 790,
+        "countryName": "Nepal"
+    },{
+        "ccode": 210,
+        "countryName": "Netherlands"
+    },{
+        "ccode": 930,
+        "countryName": "New Caledonia and Dependencies"
+    },{
+        "ccode": 912,
+        "countryName": "New Guinea (German New Guinea) (Kaiser Wilhelmsland)"
+    },{
+        "ccode": 920,
+        "countryName": "New Zealand"
+    },{
+        "ccode": 21,
+        "countryName": "Newfoundland"
+    },{
+        "ccode": 93,
+        "countryName": "Nicaragua"
+    },{
+        "ccode": 436,
+        "countryName": "Niger"
+    },{
+        "ccode": 475,
+        "countryName": "Nigeria"
+    },{
+        "ccode": 385,
+        "countryName": "Norway"
+    },{
+        "ccode": 698,
+        "countryName": "Oman"
+    },{
+        "ccode": 770,
+        "countryName": "Pakistan"
+    },{
+        "ccode": 665,
+        "countryName": "Palestine"
+    },{
+        "ccode": 95,
+        "countryName": "Panama"
+    },{
+        "ccode": 911,
+        "countryName": "Papua"
+    },{
+        "ccode": 910,
+        "countryName": "Papua New Guinea"
+    },{
+        "ccode": 150,
+        "countryName": "Paraguay"
+    },{
+        "ccode": 135,
+        "countryName": "Peru"
+    },{
+        "ccode": 840,
+        "countryName": "Philippines"
+    },{
+        "ccode": 290,
+        "countryName": "Poland"
+    },{
+        "ccode": 235,
+        "countryName": "Portugal"
+    },{
+        "ccode": 6,
+        "countryName": "Puerto Rico"
+    },{
+        "ccode": 694,
+        "countryName": "Qatar"
+    },{
+        "ccode": 585,
+        "countryName": "Reunion"
+    },{
+        "ccode": 360,
+        "countryName": "Rumania"
+    },{
+        "ccode": 365,
+        "countryName": "Russia (Soviet Union)"
+    },{
+        "ccode": 517,
+        "countryName": "Rwanda"
+    },{
+        "ccode": 515,
+        "countryName": "Rwanda-Urundi"
+    },{
+        "ccode": 823,
+        "countryName": "Sabah (North Borneo)"
+    },{
+        "ccode": 824,
+        "countryName": "Sarawak"
+    },{
+        "ccode": 670,
+        "countryName": "Saudi Arabia"
+    },{
+        "ccode": 433,
+        "countryName": "Senegal"
+    },{
+        "ccode": 345,
+        "countryName": "Serbia"
+    },{
+        "ccode": 451,
+        "countryName": "Sierra Leone"
+    },{
+        "ccode": 830,
+        "countryName": "Singapore"
+    },{
+        "ccode": 317,
+        "countryName": "Slovakia"
+    },{
+        "ccode": 349,
+        "countryName": "Slovenia"
+    },{
+        "ccode": 940,
+        "countryName": "Solomon Islands"
+    },{
+        "ccode": 520,
+        "countryName": "Somalia"
+    },{
+        "ccode": 560,
+        "countryName": "South Africa"
+    },{
+        "ccode": 626,
+        "countryName": "South Sudan"
+    },{
+        "ccode": 7351,
+        "countryName": "Southern Sakhalin Island"
+    },{
+        "ccode": 6021,
+        "countryName": "Southern zone of Spanish Morocco"
+    },{
+        "ccode": 230,
+        "countryName": "Spain"
+    },{
+        "ccode": 602,
+        "countryName": "Spanish Morocco"
+    },{
+        "ccode": 609,
+        "countryName": "Spanish Sahara"
+    },{
+        "ccode": 610,
+        "countryName": "Spanish West Africa"
+    },{
+        "ccode": 780,
+        "countryName": "Sri Lanka (Ceylon)"
+    },{
+        "ccode": 60,
+        "countryName": "St. Kitts and Nevis"
+    },{
+        "ccode": 827,
+        "countryName": "Straits Settlements"
+    },{
+        "ccode": 625,
+        "countryName": "Sudan"
+    },{
+        "ccode": 115,
+        "countryName": "Surinam"
+    },{
+        "ccode": 572,
+        "countryName": "Swaziland (Eswatini)"
+    },{
+        "ccode": 380,
+        "countryName": "Sweden"
+    },{
+        "ccode": 225,
+        "countryName": "Switzerland"
+    },{
+        "ccode": 652,
+        "countryName": "Syria"
+    },{
+        "ccode": 713,
+        "countryName": "Taiwan"
+    },{
+        "ccode": 702,
+        "countryName": "Tajikistan"
+    },{
+        "ccode": 510,
+        "countryName": "Tanzania (Tanganyika)"
+    },{
+        "ccode": 800,
+        "countryName": "Thailand"
+    },{
+        "ccode": 461,
+        "countryName": "Togo"
+    },{
+        "ccode": 52,
+        "countryName": "Trinidad and Tobago"
+    },{
+        "ccode": 616,
+        "countryName": "Tunisia"
+    },{
+        "ccode": 640,
+        "countryName": "Turkey (Ottoman Empire)"
+    },{
+        "ccode": 701,
+        "countryName": "Turkmenistan"
+    },{
+        "ccode": 500,
+        "countryName": "Uganda"
+    },{
+        "ccode": 369,
+        "countryName": "Ukraine"
+    },{
+        "ccode": 822,
+        "countryName": "Unfederated Malay States"
+    },{
+        "ccode": 696,
+        "countryName": "United Arab Emirates"
+    },{
+        "ccode": 200,
+        "countryName": "United Kingdom"
+    },{
+        "ccode": 2,
+        "countryName": "United States of America"
+    },{
+        "ccode": 165,
+        "countryName": "Uruguay"
+    },{
+        "ccode": 704,
+        "countryName": "Uzbekistan"
+    },{
+        "ccode": 935,
+        "countryName": "Vanuatu"
+    },{
+        "ccode": 101,
+        "countryName": "Venezuela"
+    },{
+        "ccode": 815,
+        "countryName": "Vietnam (Annam/Cochin China/Tonkin)"
+    },{
+        "ccode": 816,
+        "countryName": "Vietnam, Democratic Republic of"
+    },{
+        "ccode": 817,
+        "countryName": "Vietnam, Republic of"
+    },{
+        "ccode": 6631,
+        "countryName": "West Bank"
+    },{
+        "ccode": 851,
+        "countryName": "West Irian (Dutch New Guinea)"
+    },{
+        "ccode": 678,
+        "countryName": "Yemen (Arab Republic of Yemen)"
+    },{
+        "ccode": 680,
+        "countryName": "Yemen, People's Republic of"
+    },{
+        "ccode": 345,
+        "countryName": "Yugoslavia"
+    },{
+        "ccode": 551,
+        "countryName": "Zambia"
+    },{
+        "ccode": 511,
+        "countryName": "Zanzibar"
+    },{
+        "ccode": 552,
+        "countryName": "Zimbabwe (Rhodesia)"
+    }
+]
+
 const getGroupByID = (req, res) => {
     res.status(200).json(group)
 }
@@ -290,7 +958,23 @@ const getGroupGeom = (req, res) => {
     })
 }
 
+const getAllCountries = (req, res) => {
+    res.status(200).json(countries);
+}
+
+const getCountryByCode = (req, res) => {
+    const ccode = parseInt(req.params['ccode']);
+
+    countries.forEach((country) => {
+        if (country.ccode === ccode){
+            res.status(200).json(country);
+        }
+    });
+}
+
 module.exports = {
     getGroupByID,
     getGroupGeom,
+    getAllCountries,
+    getCountryByCode,
 }
