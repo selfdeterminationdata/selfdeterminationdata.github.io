@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, {useState, useEffect} from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 
@@ -13,25 +13,44 @@ const countries = [
 ];
 
 export default function SearchBar() {
+    const [countriesList, setCountriesList] = useState(countries);
+    useEffect(() => {
+        // GET request using fetch inside useEffect React hook
+        fetch("http://localhost:3000/countries")
+            .then((response) => response.json())
+            .then((data) => {
+                const countryList = data.map((country) => ({
+                    label: country.countryName
+                }));
+                setCountriesList(countryList);
+            })
+            .catch((error) => {
+                console.error("Error fetching countries:", error);
+            });
+    }, []);
     return (
         <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
             <Autocomplete
                 disablePortal
-                options={countries}
+                options={countriesList}
                 sx={{
                     position: "absolute",
                     zIndex: "tooltip",
                     width: "80vw",
                     height: "5vh",
                     paddingTop: "70px",
-                    "& .MuiOutlinedInput-root": {borderRadius: "25px", alignItems: "center"},
+                    "& .MuiOutlinedInput-root": {
+                        borderRadius: "25px",
+                        alignItems: "center",
+                        backgroundColor: "rgba(255, 255, 255, 0.5)"
+                    },
                     "& .MuiAutocomplete-inputRoot": {paddingLeft: "20px", paddingTop: "10px"}
                 }}
                 componentsProps={{
                     paper: {
                         sx: {
-                            backgroundColor: "rgba(255, 255, 255, 0.5)",
-                            "& .MuiOutlinedInput-root": {borderRadius: "25px"}
+                            borderRadius: "25px",
+                            backgroundColor: "rgba(255, 255, 255, 0.5)"
                         }
                     }
                 }}

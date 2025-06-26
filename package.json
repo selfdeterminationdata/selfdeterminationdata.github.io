@@ -47,6 +47,7 @@
     "@vis.gl/react-maplibre": "^8.0.4",
     "babel-node": "^0.0.1-security",
     "concurrently": "^9.1.2",
+    "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "deck.gl": "^9.1.12",
     "express": "^5.1.0",
