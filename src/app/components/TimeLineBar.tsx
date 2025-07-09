@@ -4,22 +4,20 @@ type TimeLineBarProps = {
     width?: string;
     height?: string;
     backgroundColor: string;
-    startYear: number;
-    endYear: number;
     minValue?: number;
     maxValue?: number;
     clickable?: boolean;
+    currentYear?: number;
 };
 
 const TimeLineBar: React.FC<TimeLineBarProps> = ({
     width = "100%",
     height = "15px",
     backgroundColor,
-    startYear,
-    endYear,
     minValue,
     maxValue,
-    clickable
+    clickable,
+    currentYear
 }) => {
     const [activeIndex, setActiveIndex] = useState<number>(clickable ? 0 : null);
     const divisions = 10;
@@ -36,7 +34,7 @@ const TimeLineBar: React.FC<TimeLineBarProps> = ({
     const maxIndex = maxValue && maxValue >= 1 && maxValue <= divisions ? maxValue - 1 : null;
 
     return (
-        <div style={{width, paddingTop: "5px"}}>
+        <div style={{width, paddingTop: "5px"}} key={currentYear}>
             {/* Timeline Bar */}
             <div
                 style={{
@@ -54,7 +52,7 @@ const TimeLineBar: React.FC<TimeLineBarProps> = ({
                         minIndex !== null && maxIndex !== null && i >= minIndex && i <= maxIndex;
 
                     const bg = isSelected
-                        ? "indigo"
+                        ? "teal"
                         : isRangeSelected
                           ? hexToRgba(backgroundColor, 0.6)
                           : "transparent";
@@ -91,8 +89,8 @@ const TimeLineBar: React.FC<TimeLineBarProps> = ({
                     fontWeight: "bold"
                 }}
             >
-                <span>{startYear}</span>
-                <span>{endYear}</span>
+                <span>{Math.floor(currentYear / 10) * 10}</span>
+                <span>{Math.ceil(currentYear / 10) * 10}</span>
             </div>
         </div>
     );
