@@ -943,11 +943,11 @@ const countries = [
     }
 ]
 
-const getGroupByID = (req, res) => {
+export const getGroupByID = (req, res) => {
     res.status(200).json(group)
 }
 
-const getGroupGeom = (req, res) => {
+export const getGroupGeom = (req, res) => {
     res.status(200).json({
         "periodID": 101010,
         "groupID": group.groupID,
@@ -958,11 +958,11 @@ const getGroupGeom = (req, res) => {
     })
 }
 
-const getAllCountries = (req, res) => {
+export const getAllCountries = (req, res) => {
     res.status(200).json(countries);
 }
 
-const getCountryByCode = (req, res) => {
+export const getCountryByCode = (req, res) => {
     const ccode = parseInt(req.params['ccode']);
 
     countries.forEach((country) => {
@@ -972,9 +972,9 @@ const getCountryByCode = (req, res) => {
     });
 }
 
-module.exports = {
-    getGroupByID,
-    getGroupGeom,
-    getAllCountries,
-    getCountryByCode,
-}
+//module.exports = {
+//    getGroupByID,
+//    getGroupGeom,
+//    getAllCountries,
+//    getCountryByCode,
+//}

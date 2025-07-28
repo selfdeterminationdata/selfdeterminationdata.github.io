@@ -1,14 +1,20 @@
-const { Pool } = require("pg");
-require("dotenv").config();
+import {Connector} from '@google-cloud/cloud-sql-connector';
+import {Pool} from "pg";
+import 'dotenv/config';
+//const { Connector } = require("@google-cloud/cloud-sql-connector");
+//const { Pool } = require("pg");
+//require("dotenv").config();
 
-const pool = new Pool({
+const connector = new Connector();
+const clientOpts = await connector.getOptions({
+  instanceConnectionName: 'unique-antonym-466108-j0:europe-west1:determination-backend',
+  ipType: 'PUBLIC',
+});
+const pool = await new Pool({
+    ...clientOpts,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
-    port:5432,
     database:"postgres",
 });
 
-module.exports = {
-  query: (text, params) => pool.query(text, params)
-};
+export const query = (text, params) => pool.query(text, params);
