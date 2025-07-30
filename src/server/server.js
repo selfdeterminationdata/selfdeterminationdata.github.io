@@ -39,16 +39,16 @@ export const getPeriodsByCCode = async (req, res) => {
 
 export const getGeomByCCode = async (req, res) => {
     const result = await query(
-    "SELECT * FROM geometries JOIN period ON geometries.geoID = period.geoID JOIN country ON period.ccode = country.ccode WHERE period.ccode = $1 AND period.minyear <= $2 AND period.maxyear >= $2;",
-    [req.params['ccode'], req.param['year']]);
+    "SELECT geometries.geoID, ST_AsGeoJSON(geometries.geom) as multiPoly FROM geometries JOIN period ON geometries.geoID = period.geoID JOIN country ON period.ccode = country.ccode WHERE period.ccode = $1 AND period.minyear <= $2 AND period.maxyear >= $2;",
+    [req.params['ccode'], req.params['year']]);
 
     res.status(200).json(result.rows);
 }
 
 export const getGeomByGroup = async (req, res) => {
     const result = await query(
-    "SELECT * FROM geometries JOIN period ON geometries.geoID = period.geoID JOIN groups ON period.groupID = groups.groupId WHERE period.groupID = $1 AND period.minyear <= $2 AND period.maxyear >= $2;",
-    [req.params['groupID'], req.param['year']]);
+    "SELECT geometries.geoID, ST_AsGeoJSON(geometries.geom) as multiPoly FROM geometries JOIN period ON geometries.geoID = period.geoID JOIN groups ON period.groupID = groups.groupId WHERE period.groupID = $1 AND period.minyear <= $2 AND period.maxyear >= $2;",
+    [req.params['groupID'], req.params['year']]);
 
     res.status(200).json(result.rows);
 }

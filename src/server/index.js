@@ -26,8 +26,8 @@ app.get("/countries/:ccode", server.getCountryByCode);
 app.get("/periods/groupID/:groupID", server.getPeriodsByGroup);
 app.get("/periods/ccode/:ccode", server.getPeriodsByCCode);
 
-app.get("/geometries/ccode/:ccode", server.getGeomByCCode);
-app.get("/geometries/groupID/:groupID", server.getGeomByGroup);
+app.get("/geometries/ccode/:ccode/:year", server.getGeomByCCode);
+app.get("/geometries/groupID/:groupID/:year", server.getGeomByGroup);
 
 app.listen(port, () => {
     console.log(`App running on port ${port}.`);
