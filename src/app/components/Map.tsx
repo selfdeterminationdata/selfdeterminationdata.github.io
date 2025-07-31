@@ -19,26 +19,63 @@ interface MapDisplayProps {
     yearSelected: number;
 }
 
+interface GeometryObj {
+  groupName : string| null;
+  geom: GeoJSON.Geometry | null;
+}
+
 const MapDisplay: React.FC<MapDisplayProps> = ({selection, setGroupOfSelection, yearSelected}) => {
     const [mapStyle, setMapStyle] = React.useState(MAP_STYLES.Streets);
+    const [flag, setFlag] = React.useState(0);
+    const [groupGeom, setGroupGeom] =  React.useState<GeometryObj[] | null>(null);
     const [showStylePanel, setShowStylePanel] = React.useState(false);
     const mapRef = React.useRef<MaplibreMap | null>(null);
     const [polygonData, setPolygonData] = React.useState<GeoJSON.Geometry | null>(null);
-    const [groupName, setGroupName] = React.useState<string | null>(null);
+    const [groupName, setGroupName] = React.useState<string | null>("hello");
 
     React.useEffect(() => {
-        if (selection == null) {
+        if (selection == null || selection == "") {
             console.log("DOES NOT ENTER");
             return;
         }
-        fetch("http://localhost:3000/group/geom/101010")
+        fetch(`http://localhost:3000/geometries/ccode/${selection}/${yearSelected}`)
             .then((res) => res.json())
-            .then((data) => {
-                setPolygonData(data.geom);
-                console.log(data.groupName);
-                setGroupName(data.groupName);
+            .then(async (data) => {
+                console.log(data);
+                await setPolygonData(JSON.parse(data[0]?.multipoly));
+                console.log(JSON.parse(data[0]?.multipoly));
             });
-    }, [selection]);
+        fetch(`http://localhost:3000/groups/country/${selection}`)
+                    .then((res) => res.json())
+                    .then(async (data) => {
+                         const groupIDSList = await data.map((groupData) => (
+                          groupData?.groupid
+                        );
+                        console.log(groupIDSList);
+                        fetch(`http://localhost:3000/geometries/groupIDS/${yearSelected}`, {
+                           method: 'POST',
+                           headers: {
+                               'Content-Type': 'application/json',
+                             },
+                           body: JSON.stringify({ groupIDS: groupIDSList })
+                        })
+                                    .then((res) => res.json())
+                                    .then((data) => {
+                                       console.log(data);
+                                       const groupGeomList: GeometryObj[] = data.map((groupData) => (
+                                          {
+                                              groupName: groupData?.groupname,
+                                              geom: JSON.parse(groupData?.multipoly)
+                                          }
+                                                               );
+                                       setGroupGeom(groupGeomList);
+                                    });
+                    });
+    }, [selection, yearSelected]);
+
+    React.useEffect(() => {
+     setFlag(flag+1);
+    },[polygonData]);
 
     const handleMapLoadNoSelection = (e: {target: MaplibreMap}) => {
         const map = e.target;
@@ -50,58 +87,100 @@ const MapDisplay: React.FC<MapDisplayProps> = ({selection, setGroupOfSelection, 
 
         if (!polygonData || !groupName) return;
 
-        const groupGeoJSON: GeoJSON.Feature = {
-            type: "Feature",
-            geometry: polygonData,
-            properties: {
-                name: groupName || "Group"
-            }
-        };
+        const geoJSONFeatureFunc = (groupObj: GeometryObj) => {
+               const groupGeoJSON: GeoJSON.Feature = {
+                   type: "Feature",
+                   geometry: groupObj.geom,
+                   properties: {
+                      name: groupObj.groupName,
+                   }
+               };
+               return groupGeoJSON;
+        }
 
         if (map.getSource(groupName)) return; // Prevent duplicate sources
 
-        map.addSource(groupName, {
-            type: "geojson",
-            data: groupGeoJSON
-        });
+        const groupGeoJSON: GeoJSON.Feature = {
+                    type: "Feature",
+                    geometry: polygonData,
+                    properties: {
+                        name: "country",
+                    }
+                };
+        map.addSource("country", {
+                       type: "geojson",
+                       data: {
+                           'type': 'FeatureCollection',
+                           'features': [groupGeoJSON]
+                                }
+                    });
+
+
+        groupGeom.forEach(geomObj => {
+            console.log(geoJSONFeatureFunc(geomObj));
+            map.addSource(geomObj.groupName, {
+               type: "geojson",
+               data: {
+                   'type': 'FeatureCollection',
+                   'features': [geoJSONFeatureFunc(geomObj)]
+                        }
+            });
+            map.addLayer({
+                id: geomObj.groupName,
+                type: "fill",
+                source: geomObj.groupName,
+                paint: {
+                   "fill-color": "#"+ Math.floor(Math.random()*16777215).toString(16);,
+                   "fill-opacity": 0.5
+                }
+            });
+             map.addLayer({
+                        id: geomObj.groupName + "outline",
+                        type: "line",
+                        source: geomObj.groupName,
+                        paint: {
+                            "line-color": "#000",
+                            "line-width": 2
+                        }
+                    });
+        })
 
         map.addLayer({
-            id: "group-fill",
-            type: "fill",
-            source: groupName,
-            paint: {
-                "fill-color": "#088",
-                "fill-opacity": 0.5
-            }
-        });
-
+                        id: "country",
+                        type: "fill",
+                        source: "country",
+                        paint: {
+                           "fill-color": "#088";,
+                           "fill-opacity": 0.5
+                        }
+                    });
         map.addLayer({
-            id: "group-outline",
-            type: "line",
-            source: groupName,
-            paint: {
-                "line-color": "#000",
-                "line-width": 2
-            }
-        });
+                                id: "group-outline",
+                                type: "line",
+                                source: "country",
+                                paint: {
+                                    "line-color": "#000",
+                                    "line-width": 2
+                                }
+                            });
 
-        map.addLayer({
-            id: "group-label",
-            type: "symbol",
-            source: groupName,
-            layout: {
-                "text-field": ["get", "name"],
-                "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-                "text-size": 14,
-                "text-anchor": "center",
-                "text-justify": "center"
-            },
-            paint: {
-                "text-color": "#111",
-                "text-halo-color": "#fff",
-                "text-halo-width": 1.5
-            }
-        });
+
+//         map.addLayer({
+//             id: "poi-labels",
+//             type: "symbol",
+//             source: groupName,
+//             layout: {
+//                 "text-field": ["get", "name"],
+//                 'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+//                 "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+//                 "text-size": 14
+//             },
+//             paint: {
+//                 "text-color": "#111",
+//                 "text-halo-color": "#fff",
+//                 "text-halo-width": 1.5
+//             }
+//         });
 
         // 👇 Center the map on the GeoJSON polygon
         const bbox = require("@turf/bbox").default;
@@ -109,9 +188,10 @@ const MapDisplay: React.FC<MapDisplayProps> = ({selection, setGroupOfSelection, 
         map.fitBounds(bounds, {padding: 40, duration: 1000});
     };
 
+
     return (
         <div
-            key={selection}
+            key={flag}
             style={{position: "relative", width: "100vw", height: !selection ? "100vh" : "65vh"}}
         >
             {/* Style Switcher Icon */}
@@ -177,7 +257,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({selection, setGroupOfSelection, 
             {/* Map */}
             <Map
                 initialViewState={{longitude: 0, latitude: 0, zoom: 0}}
-                style={{width: "100vw", height: !selection ? "100vh" : "65vh", padding: "0px"}}
+                style={{width: "100vw", height: !selection ? "100vh" : "65vh"}}
                 mapStyle={mapStyle}
                 onLoad={!selection ? handleMapLoadNoSelection : handleMapLoad}
             />

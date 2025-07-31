@@ -4,31 +4,24 @@ import Autocomplete from "@mui/material/Autocomplete";
 
 interface CountryOption {
     label: string;
+    key: string;
 }
 
 interface SearchBarProps {
     onSelect: (value: string) => void;
 }
 
-const defaultCountries: CountryOption[] = [
-    {label: "Afghanistan"},
-    {label: "Albania"},
-    {label: "Algeria"},
-    {label: "Andorra"},
-    {label: "Angola"},
-    {label: "Antigua and Barbuda"},
-    {label: "Argentina"}
-];
-
 const SearchBar: React.FC<SearchBarProps> = ({onSelect}) => {
-    const [countriesList, setCountriesList] = useState<CountryOption[]>(defaultCountries);
+    const [countriesList, setCountriesList] = useState<CountryOption[]>([]);
 
     useEffect(() => {
         fetch("http://localhost:3000/countries")
             .then((response) => response.json())
             .then((data) => {
+               console.log(data);
                 const countryList = data.map((country: any) => ({
-                    label: country.countryName
+                    key: country.ccode,
+                    label: country.countryname
                 }));
                 setCountriesList(countryList);
             })
@@ -42,7 +35,7 @@ const SearchBar: React.FC<SearchBarProps> = ({onSelect}) => {
             <Autocomplete
                 disablePortal
                 options={countriesList}
-                onChange={(_, value) => onSelect(value ? value.label : "")}
+                onChange={(_, value) => onSelect(value ? value.key : "")}
                 sx={{
                     position: "absolute",
                     zIndex: 1200,

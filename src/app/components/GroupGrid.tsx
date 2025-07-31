@@ -79,6 +79,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({ groupsOfSelected, setYearSelected
             startYear={1945}
             endYear={2020}
             initialValue={2020}
+            handleChangeHelper={setYearSelected}
           />
         </div>
       )
