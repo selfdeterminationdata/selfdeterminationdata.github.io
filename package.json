@@ -41,14 +41,15 @@
     "webpack-dev-server": "5.2.1"
   },
   "dependencies": {
-    "@google-cloud/cloud-sql-connector": "^1.8.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@google-cloud/cloud-sql-connector": "^1.8.2",
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
     "@mui/x-data-grid": "^8.6.0",
     "@mui/x-date-pickers": "^8.6.0",
     "@turf/bbox": "^7.2.0",
+    "@turf/centroid": "^7.2.0",
     "@vis.gl/react-maplibre": "^8.0.4",
     "babel-node": "^0.0.1-security",
     "concurrently": "^9.1.2",

@@ -1,13 +1,15 @@
-import React, { useState } from "react";
-import Button from '@mui/material/Button';
+import React, {useState} from "react";
+import Button from "@mui/material/Button";
 import MapDisplay from "components/Map";
 import SearchBar from "components/SearchBar";
 import GroupGrid from "components/GroupGrid";
 import Legend from "components/Legend";
-import MapIcon from '@mui/icons-material/Map';
+import MapIcon from "@mui/icons-material/Map";
 import FileDownloadIcon from "components/DownloadIcon";
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import InfoIcon from '@mui/icons-material/Info'; // 👈 Optional icon for "About"
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import InfoIcon from "@mui/icons-material/Info"; // 👈 Optional icon for "About"
+import "maplibre-gl/dist/maplibre-gl.css";
+import "./maplibre-fix.css";
 
 const App: React.FC = () => {
     const [searchSelection, setSearchSelection] = useState<string | null>(null);
@@ -30,7 +32,14 @@ const App: React.FC = () => {
     };
 
     return (
-        <div style={{ position: "relative", backgroundColor: "#f5f5f5", maxHeight: "100vh", maxWidth: "100vw" }}>
+        <div
+            style={{
+                position: "relative",
+                backgroundColor: "#f5f5f5",
+                maxHeight: "100vh",
+                maxWidth: "100vw"
+            }}
+        >
             {/* Overlay */}
             {showOverlay && (
                 <div
@@ -51,18 +60,33 @@ const App: React.FC = () => {
                         textAlign: "center"
                     }}
                 >
-                    <h1 style={{ marginBottom: "1rem" }}>
+                    <h1 style={{marginBottom: "1rem"}}>
                         {overlayMode === "intro" ? "Lorem Ipsum" : "About This App"}
                     </h1>
-                    <p style={{ maxWidth: "600px", marginBottom: "2rem" }}>
+                    <p style={{maxWidth: "600px", marginBottom: "2rem"}}>
                         {overlayMode === "intro"
                             ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                             : "This application helps you visualize data using an interactive map, search by location, and explore grouped information across years."}
                     </p>
-                    <div style={{ display: "flex", gap: "1rem" }}>
-                        <Button onClick={handleMapClick} startIcon={<MapIcon />} variant="outlined">Map</Button>
-                        <Button onClick={handleDownloadClick} startIcon={<CloudDownloadIcon />} variant="contained">Download</Button>
-                        <Button onClick={handleAboutClick} startIcon={<InfoIcon />} variant="outlined">About</Button> {/* 👈 New About Button */}
+                    <div style={{display: "flex", gap: "1rem"}}>
+                        <Button onClick={handleMapClick} startIcon={<MapIcon />} variant="outlined">
+                            Map
+                        </Button>
+                        <Button
+                            onClick={handleDownloadClick}
+                            startIcon={<CloudDownloadIcon />}
+                            variant="contained"
+                        >
+                            Download
+                        </Button>
+                        <Button
+                            onClick={handleAboutClick}
+                            startIcon={<InfoIcon />}
+                            variant="outlined"
+                        >
+                            About
+                        </Button>{" "}
+                        {/* 👈 New About Button */}
                     </div>
                 </div>
             )}
@@ -77,7 +101,11 @@ const App: React.FC = () => {
                 }}
             >
                 <SearchBar onSelect={setSearchSelection} />
-                <MapDisplay selection={searchSelection} setGroupOfSelection={setGroupOfSelection} yearSelected={yearSelected} />
+                <MapDisplay
+                    selection={searchSelection}
+                    setGroupOfSelection={setGroupOfSelection}
+                    yearSelected={yearSelected}
+                />
             </div>
 
             {searchSelection && (
@@ -94,11 +122,13 @@ const App: React.FC = () => {
                     <FileDownloadIcon />
                 </div>
             )}
-
-            {searchSelection && <GroupGrid groupsOfSelected={groups} setYearSelected={setYearSelected} />}
+            <div style={{height: "30vh"}}>
+                {searchSelection && (
+                    <GroupGrid groupsOfSelected={groups} setYearSelected={setYearSelected} />
+                )}
+            </div>
         </div>
     );
 };
 
 export default App;
-

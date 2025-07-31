@@ -1,102 +1,151 @@
 import React from "react";
-import { DataGrid, GridRowsProp, GridColDef } from "@mui/x-data-grid";
+import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import TimeLineSlider from "./TimeLineSlider";
 
-const rows: GridRowsProp = [
-  {
-    id: 1,
-    name: "Hazaraz",
-    width: "900px",
-    height: "5px",
-    backgroundColor: "olive",
-    startYear: 1960,
-    endYear: 1970,
-    minValue: 3,
-    maxValue: 7
-  }
-];
-
-interface GroupGridProps {
-  groupsOfSelected: string[] | null;
-  setYearSelected: (value: number) =>  void;
+interface HighlightRange {
+    from: number;
+    to: number;
 }
 
-const GroupGrid: React.FC<GroupGridProps> = ({ groupsOfSelected, setYearSelected }) => {
-  const columns: GridColDef[] = [
-    {
-      field: "name",
-      headerName: "Self-determination Movement",
-      width: 200,
-      headerAlign: "center",
-      align: "center",
-      renderCell: (params) => (
-        <div style={{ padding: "8px 12px" }}>{params.value}</div>
-      )
-    },
-    {
-      field: "description",
-      headerName: "Timeline",
-      sortable: false,
-      headerAlign: "center",
-      align: "center",
-      flex: 1,
-      renderCell: () => (
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <TimeLineSlider
-            width="1000px"
-            height="60px"
-            disable={true}
-            startYear={1945}
-            endYear={2020}
-            backgroundColor="orange"
-            highlightRanges={[
-              { from: 1950, to: 1955 },
-              { from: 1970, to: 1980 },
-              { from: 2000, to: 2010 }
-            ]}
-          />
-        </div>
-      ),
-      renderHeader: () => (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <TimeLineSlider
-            width="1000px"
-            height="60px"
-            backgroundColor="darkslategray"
-            startYear={1945}
-            endYear={2020}
-            initialValue={2020}
-            handleChangeHelper={setYearSelected}
-          />
-        </div>
-      )
-    }
-  ];
+interface RowData {
+    id: number;
+    name: string;
+    highlightRanges: HighlightRange[];
+}
 
-  return (
-    <div style={{ width: "100%" }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        hideFooter
-        getRowHeight={() => "auto"}
-        autoHeight
-      />
-    </div>
-  );
+interface GroupDataType {
+    periodid?: number;
+    minyear?: number;
+    maxyear?: number;
+    claim?: string | null;
+    violent?: boolean | null;
+    groupid?: number;
+    ccode?: number;
+    geoid?: number;
+    groupname?: string | null;
+}
+
+const generateRowProps = (rowsArray: RowData[]): RowData[] => {
+    const rowProps: RowData[] = [];
+
+    for (const row of rowsArray) {
+        const existingIndex = rowProps.findIndex((el) => el.id === row.id);
+
+        if (existingIndex !== -1) {
+            rowProps[existingIndex].highlightRanges = [
+                ...rowProps[existingIndex].highlightRanges,
+                ...row.highlightRanges
+            ];
+        } else {
+            rowProps.push(row);
+        }
+    }
+
+    return rowProps;
+};
+
+interface GroupGridProps {
+    groupsOfSelected: string[] | null;
+    setYearSelected: (value: number) => void;
+}
+
+const GroupGrid: React.FC<GroupGridProps> = ({groupsOfSelected, setYearSelected}) => {
+    const [rowsGrid, setRowsGrid] = React.useState<RowData[]>([]);
+
+    React.useEffect(() => {
+        if (!groupsOfSelected || groupsOfSelected.length === 0) {
+            return;
+        }
+
+        fetch(`http://localhost:3000/periods/groupIDS`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({groupIDS: groupsOfSelected})
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                const rowsData: RowData[] = data.map((groupData: GroupDataType) => ({
+                    id: groupData?.groupid,
+                    name: groupData?.groupname,
+                    highlightRanges: [
+                        {
+                            from: groupData?.minyear,
+                            to: groupData?.maxyear,
+                            claim: groupData?.claim,
+                            violence: groupData?.violent
+                        }
+                    ]
+                }));
+
+                setRowsGrid(generateRowProps(rowsData));
+            })
+            .catch((err) => console.error("Error fetching data:", err));
+    }, [groupsOfSelected]);
+
+    const columns: GridColDef[] = [
+        {
+            field: "name",
+            headerName: "Self-determination Movement",
+            width: 200,
+            headerAlign: "center",
+            align: "center",
+            renderCell: (params) => <div style={{padding: "8px 12px"}}>{params.value}</div>
+        },
+        {
+            field: "description",
+            headerName: "Timeline",
+            sortable: false,
+            headerAlign: "center",
+            align: "center",
+            flex: 1,
+            renderCell: (params) => (
+                <div
+                    style={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                >
+                    <TimeLineSlider
+                        width="1000px"
+                        height="60px"
+                        disable={true}
+                        startYear={1945}
+                        endYear={2020}
+                        backgroundColor="grey"
+                        highlightRanges={params.row.highlightRanges}
+                    />
+                </div>
+            ),
+            renderHeader: () => (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}
+                >
+                    <TimeLineSlider
+                        width="1000px"
+                        height="60px"
+                        startYear={1945}
+                        endYear={2020}
+                        initialValue={2020}
+                        handleChangeHelper={setYearSelected}
+                    />
+                </div>
+            )
+        }
+    ];
+
+    return (
+        <div style={{height: "27vh", width: "100%"}}>
+            <DataGrid rows={rowsGrid} columns={columns} hideFooter getRowHeight={() => "auto"} />
+        </div>
+    );
 };
 
 export default GroupGrid;

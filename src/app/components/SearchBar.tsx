@@ -18,8 +18,8 @@ const SearchBar: React.FC<SearchBarProps> = ({onSelect}) => {
         fetch("http://localhost:3000/countries")
             .then((response) => response.json())
             .then((data) => {
-               console.log(data);
-                const countryList = data.map((country: any) => ({
+                console.log(data);
+                const countryList = data.map((country) => ({
                     key: country.ccode,
                     label: country.countryname
                 }));

@@ -2,7 +2,7 @@ import {query} from "./db.js";
 //const db =  require("./db.js");
 
 export const getAllCountries = async (req, res) => {
-    const result = await query("SELECT * FROM country;");
+    const result = await query("SELECT * FROM country ORDER BY countryname;");
 
     res.status(200).json(result.rows);
 }

@@ -3,6 +3,8 @@ import {Map} from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {Map as MaplibreMap} from "maplibre-gl";
 import {FaMapMarkedAlt} from "react-icons/fa";
+import {bbox} from "@turf/bbox";
+import {centroid} from "@turf/centroid";
 
 const MAP_STYLES = {
     Streets: "https://api.maptiler.com/maps/streets/style.json?key=p51HaAszwX0vYbRQVlar",
@@ -20,18 +22,17 @@ interface MapDisplayProps {
 }
 
 interface GeometryObj {
-  groupName : string| null;
-  geom: GeoJSON.Geometry | null;
+    groupName: string | null;
+    geom: GeoJSON.Geometry | null;
 }
 
 const MapDisplay: React.FC<MapDisplayProps> = ({selection, setGroupOfSelection, yearSelected}) => {
     const [mapStyle, setMapStyle] = React.useState(MAP_STYLES.Streets);
     const [flag, setFlag] = React.useState(0);
-    const [groupGeom, setGroupGeom] =  React.useState<GeometryObj[] | null>(null);
+    const [groupGeom, setGroupGeom] = React.useState<GeometryObj[] | null>(null);
     const [showStylePanel, setShowStylePanel] = React.useState(false);
     const mapRef = React.useRef<MaplibreMap | null>(null);
     const [polygonData, setPolygonData] = React.useState<GeoJSON.Geometry | null>(null);
-    const [groupName, setGroupName] = React.useState<string | null>("hello");
 
     React.useEffect(() => {
         if (selection == null || selection == "") {
@@ -46,36 +47,35 @@ const MapDisplay: React.FC<MapDisplayProps> = ({selection, setGroupOfSelection, 
                 console.log(JSON.parse(data[0]?.multipoly));
             });
         fetch(`http://localhost:3000/groups/country/${selection}`)
+            .then((res) => res.json())
+            .then(async (data) => {
+                const groupIDSList = await data.map((groupData) => groupData?.groupid);
+                console.log(groupIDSList);
+                setGroupOfSelection(groupIDSList);
+                fetch(`http://localhost:3000/geometries/groupIDS/${yearSelected}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({groupIDS: groupIDSList})
+                })
                     .then((res) => res.json())
-                    .then(async (data) => {
-                         const groupIDSList = await data.map((groupData) => (
-                          groupData?.groupid
+                    .then(async (groupGeomsData) => {
+                        console.log(groupGeomsData);
+                        const groupGeomList: GeometryObj[] = await groupGeomsData.map(
+                            (groupData) => ({
+                                groupName: groupData?.groupname,
+                                geom: JSON.parse(groupData?.multipoly)
+                            })
                         );
-                        console.log(groupIDSList);
-                        fetch(`http://localhost:3000/geometries/groupIDS/${yearSelected}`, {
-                           method: 'POST',
-                           headers: {
-                               'Content-Type': 'application/json',
-                             },
-                           body: JSON.stringify({ groupIDS: groupIDSList })
-                        })
-                                    .then((res) => res.json())
-                                    .then((data) => {
-                                       console.log(data);
-                                       const groupGeomList: GeometryObj[] = data.map((groupData) => (
-                                          {
-                                              groupName: groupData?.groupname,
-                                              geom: JSON.parse(groupData?.multipoly)
-                                          }
-                                                               );
-                                       setGroupGeom(groupGeomList);
-                                    });
+                        await setGroupGeom(groupGeomList);
                     });
-    }, [selection, yearSelected]);
+            });
+    }, [selection, yearSelected, setGroupOfSelection]);
 
     React.useEffect(() => {
-     setFlag(flag+1);
-    },[polygonData]);
+        setFlag((f) => f + 1);
+    }, [groupGeom]);
 
     const handleMapLoadNoSelection = (e: {target: MaplibreMap}) => {
         const map = e.target;
@@ -85,109 +85,128 @@ const MapDisplay: React.FC<MapDisplayProps> = ({selection, setGroupOfSelection, 
         const map = e.target;
         mapRef.current = map;
 
-        if (!polygonData || !groupName) return;
+        if (!polygonData) return;
 
         const geoJSONFeatureFunc = (groupObj: GeometryObj) => {
-               const groupGeoJSON: GeoJSON.Feature = {
-                   type: "Feature",
-                   geometry: groupObj.geom,
-                   properties: {
-                      name: groupObj.groupName,
-                   }
-               };
-               return groupGeoJSON;
-        }
-
-        if (map.getSource(groupName)) return; // Prevent duplicate sources
+            const groupGeoJSON: GeoJSON.Feature = {
+                type: "Feature",
+                geometry: groupObj.geom,
+                properties: {
+                    name: groupObj.groupName
+                }
+            };
+            return groupGeoJSON;
+        };
 
         const groupGeoJSON: GeoJSON.Feature = {
-                    type: "Feature",
-                    geometry: polygonData,
-                    properties: {
-                        name: "country",
-                    }
-                };
+            type: "Feature",
+            geometry: polygonData,
+            properties: {
+                name: "country"
+            }
+        };
         map.addSource("country", {
-                       type: "geojson",
-                       data: {
-                           'type': 'FeatureCollection',
-                           'features': [groupGeoJSON]
-                                }
-                    });
+            type: "geojson",
+            data: {
+                type: "FeatureCollection",
+                features: [groupGeoJSON]
+            }
+        });
 
-
-        groupGeom.forEach(geomObj => {
+        groupGeom?.forEach((geomObj) => {
             console.log(geoJSONFeatureFunc(geomObj));
             map.addSource(geomObj.groupName, {
-               type: "geojson",
-               data: {
-                   'type': 'FeatureCollection',
-                   'features': [geoJSONFeatureFunc(geomObj)]
-                        }
+                type: "geojson",
+                data: {
+                    type: "FeatureCollection",
+                    features: [geoJSONFeatureFunc(geomObj)]
+                }
             });
             map.addLayer({
                 id: geomObj.groupName,
                 type: "fill",
                 source: geomObj.groupName,
                 paint: {
-                   "fill-color": "#"+ Math.floor(Math.random()*16777215).toString(16);,
-                   "fill-opacity": 0.5
+                    "fill-color": "#" + Math.floor(Math.random() * 16777215).toString(16),
+                    "fill-opacity": 1.0
                 }
             });
-             map.addLayer({
-                        id: geomObj.groupName + "outline",
-                        type: "line",
-                        source: geomObj.groupName,
-                        paint: {
-                            "line-color": "#000",
-                            "line-width": 2
-                        }
-                    });
-        })
+            map.addLayer({
+                id: geomObj.groupName + "outline",
+                type: "line",
+                source: geomObj.groupName,
+                paint: {
+                    "line-color": "#000",
+                    "line-width": 2
+                }
+            });
+            const labelFeature = centroid(geoJSONFeatureFunc(geomObj));
+            labelFeature.properties = {name: geomObj.groupName};
+
+            // Separate source for label
+            map.addSource(geomObj.groupName + "-label", {
+                type: "geojson",
+                data: {type: "FeatureCollection", features: [labelFeature]}
+            });
+
+            map.addLayer({
+                id: geomObj.groupName + "-label",
+                type: "symbol",
+                source: geomObj.groupName + "-label",
+                layout: {
+                    "text-field": ["get", "name"],
+                    "text-size": 14,
+                    "text-offset": [0, 0.6],
+                    "text-anchor": "top"
+                },
+                paint: {
+                    "text-color": "#000",
+                    "text-halo-color": "#fff",
+                    "text-halo-width": 1.5
+                }
+            });
+        });
 
         map.addLayer({
-                        id: "country",
-                        type: "fill",
-                        source: "country",
-                        paint: {
-                           "fill-color": "#088";,
-                           "fill-opacity": 0.5
-                        }
-                    });
+            id: "country",
+            type: "fill",
+            source: "country",
+            paint: {
+                "fill-color": "#088",
+                "fill-opacity": 0.5
+            }
+        });
         map.addLayer({
-                                id: "group-outline",
-                                type: "line",
-                                source: "country",
-                                paint: {
-                                    "line-color": "#000",
-                                    "line-width": 2
-                                }
-                            });
+            id: "group-outline",
+            type: "line",
+            source: "country",
+            paint: {
+                "line-color": "#000",
+                "line-width": 2
+            }
+        });
 
-
-//         map.addLayer({
-//             id: "poi-labels",
-//             type: "symbol",
-//             source: groupName,
-//             layout: {
-//                 "text-field": ["get", "name"],
-//                 'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-//                 "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-//                 "text-size": 14
-//             },
-//             paint: {
-//                 "text-color": "#111",
-//                 "text-halo-color": "#fff",
-//                 "text-halo-width": 1.5
-//             }
-//         });
+        //         map.addLayer({
+        //             id: "poi-labels",
+        //             type: "symbol",
+        //             source: groupName,
+        //             layout: {
+        //                 "text-field": ["get", "name"],
+        //                 'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+        //                 "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
+        //                 "text-size": 14
+        //             },
+        //             paint: {
+        //                 "text-color": "#111",
+        //                 "text-halo-color": "#fff",
+        //                 "text-halo-width": 1.5
+        //             }
+        //         });
 
         // 👇 Center the map on the GeoJSON polygon
-        const bbox = require("@turf/bbox").default;
-        const bounds = bbox(groupGeoJSON); // [minX, minY, maxX, maxY]
-        map.fitBounds(bounds, {padding: 40, duration: 1000});
+        const [minX, minY, maxX, maxY] = bbox(groupGeoJSON); // [minX, minY, maxX, maxY]
+        map.fitBounds([minX, minY, maxX, maxY], {padding: 40, duration: 1000});
     };
-
 
     return (
         <div
@@ -257,7 +276,13 @@ const MapDisplay: React.FC<MapDisplayProps> = ({selection, setGroupOfSelection, 
             {/* Map */}
             <Map
                 initialViewState={{longitude: 0, latitude: 0, zoom: 0}}
-                style={{width: "100vw", height: !selection ? "100vh" : "65vh"}}
+                style={{
+                    width: "100vw",
+                    height: !selection ? "100vh" : "65vh",
+                    position: "absolute",
+                    top: 0,
+                    left: 0
+                }}
                 mapStyle={mapStyle}
                 onLoad={!selection ? handleMapLoadNoSelection : handleMapLoad}
             />

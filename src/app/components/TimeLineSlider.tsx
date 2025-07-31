@@ -5,6 +5,8 @@ import {ChevronLeft, ChevronRight} from "@mui/icons-material";
 type HighlightRange = {
     from: number;
     to: number;
+    claim?: string | null;
+    violence?: boolean | null;
 };
 
 type TimeLineSliderProps = {
@@ -25,7 +27,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
     disable = false,
     startYear,
     endYear,
-    backgroundColor = "#1976d2",
+    backgroundColor = "#663399",
     initialValue = 1945,
     highlightRanges,
     handleChangeHelper
@@ -38,8 +40,25 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
 
     const handleChange = (_: Event, newValue: number | number[]) => {
         if (typeof newValue === "number") {
-            handleChangeHelper != null ? handleChangeHelper(newValue) : null;
+            if (handleChangeHelper != null) {
+                handleChangeHelper(newValue);
+            }
             setValue(newValue);
+        }
+    };
+
+    const legendItems = [
+        {label: "Autonomy", color: "#90ee90"}, // Light green
+        {label: "Sub-state secession", color: "#006400"}, // Dark green
+        {label: "Independence", color: "#add8e6"}, // Light blue
+        {label: "Irredentism", color: "#00008b"} // Dark blue
+    ];
+    const generateBackgroundColor = (highlightRangesProp: HighlightRange) => {
+        const findIndex = legendItems.findIndex((el) => el.label === highlightRangesProp?.claim);
+        if (findIndex != -1) {
+            return legendItems[findIndex]?.color;
+        } else {
+            return "#A9A9A9";
         }
     };
 
@@ -127,7 +146,8 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                     >
                         {highlightRanges?.map((range, index) => {
                             const left = ((range.from - startYear) / (endYear - startYear)) * 100;
-                            const width = ((range.to - range.from) / (endYear - startYear)) * 100;
+                            const widthBar =
+                                ((range.to - range.from) / (endYear - startYear)) * 100;
 
                             return (
                                 <Box
@@ -135,19 +155,20 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                                     sx={{
                                         position: "absolute",
                                         left: `${left}%`,
-                                        width: `${width}%`,
+                                        width: `${widthBar}%`,
                                         height: "100%",
-                                        backgroundColor: "red", // yellow highlight
+                                        backgroundColor: generateBackgroundColor(range), // yellow highlight
                                         borderRadius: "3px"
                                     }}
                                 >
-                                {' 🔥'}
+                                    {range?.violence ? " 🔥" : ""}
                                 </Box>
                             );
                         })}
                     </Box>
 
                     <Slider
+                        disabled={disable}
                         value={value}
                         min={startYear}
                         max={endYear}

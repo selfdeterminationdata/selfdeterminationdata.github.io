@@ -1,7 +1,7 @@
 import React from "react";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
-import DescriptionIcon from '@mui/icons-material/Description';
+import DescriptionIcon from "@mui/icons-material/Description";
 
 const FileDownloadIcon: React.FC = () => {
     const handleClick = () => {
