@@ -1,0 +1,29 @@
+name: Google API Access
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  access-google-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Decrypt Google API credentials
+        run: |
+          mkdir -p $HOME/secrets
+          gpg --quiet --batch --yes --decrypt --passphrase="$GOOGLE_API_PW" \
+            --output $HOME/secrets/credentials.json credentials.json.gpg
+        env:
+          GOOGLE_API_PW: ${{ secrets.GOOGLE_API_PW }}
+
+      - name: Run PHP script
+        run: php php-script.php
