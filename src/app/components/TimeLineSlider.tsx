@@ -86,7 +86,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
     };
 
     useEffect(() => {
-        handleScroll(); // initial visibility
+        handleScroll();
     }, []);
 
     useEffect(() => {
@@ -94,7 +94,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
         if (container) {
             container.scrollTo({
                 left: container.scrollWidth,
-                behavior: "auto" // or 'smooth' if you want animation
+                behavior: "smooth"
             });
         }
     }, []);
@@ -128,7 +128,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                     sx={{
                         width: `${(endYear - startYear) * 30}px`,
                         minWidth: "600px",
-                        position: "relative" // for overlay positioning
+                        position: "relative"
                     }}
                 >
                     {/* Highlight overlay */}
@@ -140,14 +140,16 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                             transform: "translateY(-50%)",
                             height: "6px",
                             width: "100%",
-                            pointerEvents: "none", // allow slider interaction through overlay
+                            pointerEvents: "none",
                             zIndex: 1
                         }}
                     >
                         {highlightRanges?.map((range, index) => {
                             const left = ((range.from - startYear) / (endYear - startYear)) * 100;
                             const widthBar =
-                                ((range.to - range.from) / (endYear - startYear)) * 100;
+                                range.to != 2020
+                                    ? ((range.to - range.from + 1) / (endYear - startYear)) * 100
+                                    : ((range.to - range.from) / (endYear - startYear)) * 100;
 
                             return (
                                 <Box
@@ -157,12 +159,19 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                                         left: `${left}%`,
                                         width: `${widthBar}%`,
                                         height: "100%",
-                                        backgroundColor: generateBackgroundColor(range), // yellow highlight
+                                        backgroundColor: generateBackgroundColor(range),
+                                        backgroundImage: range?.violence
+                                            ? `repeating-linear-gradient(
+                                                  45deg,
+                                                  rgba(255, 255, 255, 0.7) 0,
+                                                  rgba(255, 255, 255, 0.7) 5px,
+                                                  transparent 10px,
+                                                  transparent 20px
+                                                )`
+                                            : "none",
                                         borderRadius: "3px"
                                     }}
-                                >
-                                    {range?.violence ? " 🔥" : ""}
-                                </Box>
+                                ></Box>
                             );
                         })}
                     </Box>

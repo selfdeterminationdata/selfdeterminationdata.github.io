@@ -47,9 +47,16 @@ const generateRowProps = (rowsArray: RowData[]): RowData[] => {
 interface GroupGridProps {
     groupsOfSelected: string[] | null;
     setYearSelected: (value: number) => void;
+    setSpecificRowSelection: (value: string) => void;
+    searchSelection: string | null;
 }
 
-const GroupGrid: React.FC<GroupGridProps> = ({groupsOfSelected, setYearSelected}) => {
+const GroupGrid: React.FC<GroupGridProps> = ({
+    groupsOfSelected,
+    setYearSelected,
+    setSpecificRowSelection,
+    searchSelection
+}) => {
     const [rowsGrid, setRowsGrid] = React.useState<RowData[]>([]);
 
     React.useEffect(() => {
@@ -67,7 +74,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({groupsOfSelected, setYearSelected}
             .then((res) => res.json())
             .then((data) => {
                 const rowsData: RowData[] = data.map((groupData: GroupDataType) => ({
-                    id: groupData?.groupid,
+                    id: groupData?.groupid + "_" + groupData?.groupname,
                     name: groupData?.groupname,
                     highlightRanges: [
                         {
@@ -80,9 +87,10 @@ const GroupGrid: React.FC<GroupGridProps> = ({groupsOfSelected, setYearSelected}
                 }));
 
                 setRowsGrid(generateRowProps(rowsData));
+                setSpecificRowSelection("");
             })
             .catch((err) => console.error("Error fetching data:", err));
-    }, [groupsOfSelected]);
+    }, [groupsOfSelected, setSpecificRowSelection]);
 
     const columns: GridColDef[] = [
         {
@@ -142,8 +150,20 @@ const GroupGrid: React.FC<GroupGridProps> = ({groupsOfSelected, setYearSelected}
     ];
 
     return (
-        <div style={{height: "27vh", width: "100%"}}>
-            <DataGrid rows={rowsGrid} columns={columns} hideFooter getRowHeight={() => "auto"} />
+        <div key={searchSelection} style={{height: "27vh", width: "100%"}}>
+            <DataGrid
+                rows={rowsGrid}
+                columns={columns}
+                hideFooter
+                getRowHeight={() => "auto"}
+                onRowSelectionModelChange={(params) => {
+                    setSpecificRowSelection(
+                        Array.from(params?.ids).length == 1
+                            ? String(Array.from(params?.ids)[0])?.split("_")[1]
+                            : ""
+                    );
+                }}
+            />
         </div>
     );
 };

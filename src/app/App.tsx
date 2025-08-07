@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import Button from "@mui/material/Button";
 import MapDisplay from "components/Map";
 import SearchBar from "components/SearchBar";
@@ -7,23 +7,45 @@ import Legend from "components/Legend";
 import MapIcon from "@mui/icons-material/Map";
 import FileDownloadIcon from "components/DownloadIcon";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import InfoIcon from "@mui/icons-material/Info"; // 👈 Optional icon for "About"
+import InfoIcon from "@mui/icons-material/Info";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./maplibre-fix.css";
 
+const loadTextFile = (filePath: string): Promise<string | undefined> => {
+    return fetch(filePath)
+        .then((response) => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.text();
+        })
+        .then((data) => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data, "text/html");
+            const htmlContent = doc.body.innerHTML;
+            return htmlContent;
+        })
+        .catch((error) => {
+            console.error("Error loading text file:", error);
+            return undefined;
+        });
+};
+
 const App: React.FC = () => {
     const [searchSelection, setSearchSelection] = useState<string | null>(null);
+    const [searchCountrySelection, setSearchCountrySelection] = useState<string | null>(null);
     const [groups, setGroupOfSelection] = useState<string[] | null>(null);
     const [yearSelected, setYearSelected] = useState<number>(2020);
     const [showOverlay, setShowOverlay] = useState(true);
-    const [overlayMode, setOverlayMode] = useState<"intro" | "about">("intro"); // 👈 New state
+    const [overlayMode, setOverlayMode] = useState<"intro" | "about">("intro");
+    const [specificRowSelection, setSpecificRow] = useState("");
+    const [overlayText, setOverlayText] = useState<string>("");
+    const dataVerseLink = "https://dataverse.harvard.edu/dataverse/harvard";
 
     const handleMapClick = () => {
         setShowOverlay(false);
     };
 
     const handleDownloadClick = () => {
-        alert("Download button clicked");
+        window.open(dataVerseLink, "_blank", "noopener,noreferrer");
     };
 
     const handleAboutClick = () => {
@@ -31,13 +53,30 @@ const App: React.FC = () => {
         setShowOverlay(true);
     };
 
+    useEffect(() => {
+        setYearSelected(2020);
+    }, [searchSelection]);
+
+    useEffect(() => {
+        if (overlayMode === "intro") {
+            loadTextFile("./LandingPage.html").then((data) => {
+                setOverlayText(data ?? "");
+            });
+        } else {
+            loadTextFile("./About.html").then((data) => {
+                setOverlayText(data ?? "");
+            });
+        }
+    }, [overlayMode]);
+
     return (
         <div
             style={{
                 position: "relative",
                 backgroundColor: "#f5f5f5",
                 maxHeight: "100vh",
-                maxWidth: "100vw"
+                maxWidth: "100vw",
+                fontFamily: "Helvetica, Arial"
             }}
         >
             {/* Overlay */}
@@ -60,14 +99,55 @@ const App: React.FC = () => {
                         textAlign: "center"
                     }}
                 >
+                    <div
+                        style={{
+                            position: "fixed",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                            padding: "10px 20px",
+                            zIndex: 1000
+                        }}
+                    >
+                        <img
+                            src="./uniofbath.png"
+                            alt="University of Bath"
+                            style={{
+                                backgroundColor: "#fff",
+                                padding: "8px",
+                                borderRadius: "4px",
+                                width: "200px"
+                            }}
+                        />
+                        <img
+                            src="./councillogo.png"
+                            alt="University of Bath"
+                            style={{
+                                backgroundColor: "#fff",
+                                padding: "8px",
+                                width: "200px"
+                            }}
+                        />
+                    </div>
                     <h1 style={{marginBottom: "1rem"}}>
-                        {overlayMode === "intro" ? "Lorem Ipsum" : "About This App"}
+                        {overlayMode === "intro" ? "SDM 2.0" : "About This App"}
                     </h1>
-                    <p style={{maxWidth: "600px", marginBottom: "2rem"}}>
-                        {overlayMode === "intro"
-                            ? "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-                            : "This application helps you visualize data using an interactive map, search by location, and explore grouped information across years."}
-                    </p>
+                    <div
+                        style={{
+                            maxWidth: "80vw",
+                            maxHeight: "65vh",
+                            overflow: "auto",
+                            whiteSpace: "pre-wrap",
+                            marginBottom: "2rem",
+                            padding: "1rem",
+                            border: "1px solid rgba(255, 255, 255, 0.2)",
+                            borderRadius: "4px"
+                        }}
+                        dangerouslySetInnerHTML={{__html: overlayText}}
+                    ></div>
                     <div style={{display: "flex", gap: "1rem"}}>
                         <Button onClick={handleMapClick} startIcon={<MapIcon />} variant="outlined">
                             Map
@@ -85,13 +165,11 @@ const App: React.FC = () => {
                             variant="outlined"
                         >
                             About
-                        </Button>{" "}
-                        {/* 👈 New About Button */}
+                        </Button>
                     </div>
                 </div>
             )}
 
-            {/* Main Content */}
             <div
                 style={{
                     height: "65vh",
@@ -100,11 +178,15 @@ const App: React.FC = () => {
                     alignItems: "center"
                 }}
             >
-                <SearchBar onSelect={setSearchSelection} />
+                <SearchBar
+                    onSelect={setSearchSelection}
+                    onCountrySelect={setSearchCountrySelection}
+                />
                 <MapDisplay
                     selection={searchSelection}
                     setGroupOfSelection={setGroupOfSelection}
                     yearSelected={yearSelected}
+                    specificRow={specificRowSelection}
                 />
             </div>
 
@@ -119,12 +201,18 @@ const App: React.FC = () => {
                     }}
                 >
                     <Legend />
-                    <FileDownloadIcon />
+                    <FileDownloadIcon searchSelection={searchCountrySelection} />
                 </div>
             )}
+
             <div style={{height: "30vh"}}>
                 {searchSelection && (
-                    <GroupGrid groupsOfSelected={groups} setYearSelected={setYearSelected} />
+                    <GroupGrid
+                        groupsOfSelected={groups}
+                        setYearSelected={setYearSelected}
+                        setSpecificRowSelection={setSpecificRow}
+                        searchSelection={searchSelection}
+                    />
                 )}
             </div>
         </div>

@@ -9,16 +9,16 @@ interface CountryOption {
 
 interface SearchBarProps {
     onSelect: (value: string) => void;
+    onCountrySelect: (value: string) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({onSelect}) => {
+const SearchBar: React.FC<SearchBarProps> = ({onSelect, onCountrySelect}) => {
     const [countriesList, setCountriesList] = useState<CountryOption[]>([]);
 
     useEffect(() => {
         fetch("http://localhost:3000/countries")
             .then((response) => response.json())
             .then((data) => {
-                console.log(data);
                 const countryList = data.map((country) => ({
                     key: country.ccode,
                     label: country.countryname
@@ -35,7 +35,10 @@ const SearchBar: React.FC<SearchBarProps> = ({onSelect}) => {
             <Autocomplete
                 disablePortal
                 options={countriesList}
-                onChange={(_, value) => onSelect(value ? value.key : "")}
+                onChange={(_, value) => {
+                    onSelect(value ? value.key : "");
+                    onCountrySelect(value ? value.label : "");
+                }}
                 sx={{
                     position: "absolute",
                     zIndex: 1200,
