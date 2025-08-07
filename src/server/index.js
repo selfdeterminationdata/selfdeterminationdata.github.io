@@ -7,6 +7,7 @@ const app = express();
 const allowedOrigins = ["http://localhost:8080"];
 
 const port = process.env.PORT || 8080;
+const host = '0.0.0.0';
 
 app.use(express.json());
 app.use(
@@ -58,6 +59,6 @@ app.get("/geometries/ccode/:ccode/:year", server.getGeomByCCode);
 app.get("/geometries/groupID/:groupID/:year", server.getGeomByGroup);
 app.post("/geometries/groupIDS/:year", server.getGeomByGroups);
 
-app.listen(port, () => {
+app.listen(port,host, () => {
     console.log(`App running on port ${port}.`);
 });
