@@ -1,0 +1,32 @@
+# Step 1: Build React frontend
+FROM node:18 as build
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy all source code
+COPY . .
+
+# Build frontend
+RUN npm run build --workspace frontend
+
+# Step 2: Set up production container
+FROM node:18
+WORKDIR /app
+
+# Copy only package files first, install production deps
+COPY package*.json ./
+RUN npm install --production
+
+# Copy all app code
+COPY . .
+
+# Copy built React files into backend's public folder
+COPY --from=build /app/frontend/build ./frontend/build
+
+# Expose port and run server
+EXPOSE 8080
+CMD ["npm", "start"]
+
