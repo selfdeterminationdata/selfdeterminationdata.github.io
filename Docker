@@ -1,32 +1,23 @@
-# Step 1: Build React frontend
-FROM node:18 as build
+# Use Node 18 LTS
+FROM node:18
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy package.json and package-lock.json first for better caching
 COPY package*.json ./
+
+# Install all dependencies
 RUN npm install
 
-# Copy all source code
+# Copy the rest of the source code
 COPY . .
 
-# Build frontend
-RUN npm run build --workspace frontend
+# Build the frontend
+RUN npm run build
 
-# Step 2: Set up production container
-FROM node:18
-WORKDIR /app
-
-# Copy only package files first, install production deps
-COPY package*.json ./
-RUN npm install --production
-
-# Copy all app code
-COPY . .
-
-# Copy built React files into backend's public folder
-COPY --from=build /app/frontend/build ./frontend/build
-
-# Expose port and run server
+# Expose the port Cloud Run will use
 EXPOSE 8080
-CMD ["npm", "start"]
 
+# Start the backend server
+CMD ["npm", "run", "server"]
