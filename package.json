@@ -9,7 +9,7 @@
     "develop": "webpack-cli serve --mode=development --env development --open --hot",
     "server": "node ./src/server/index.js",
     "dev": "concurrently \"npm run server\" \"npm run develop\"",
-    "build": "webpack --mode=production --env production --progress --config webpack.config.ts",
+    "build": "webpack --mode=production --config webpack.config.js",
     "lint": "eslint './src/app/**/*.{ts,tsx,js,jsx}'",
     "lint:fix": "eslint './src/app/**/*.{ts,tsx,js,jsx}' --fix"
   },
