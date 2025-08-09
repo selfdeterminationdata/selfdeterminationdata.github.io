@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:22 as build
 
 WORKDIR /app
 
@@ -12,10 +12,9 @@ COPY . .
 # Build frontend
 RUN npm run build
 
-# Expose port (Cloud Run default)
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 8080
-
-# Start your backend server
-CMD ["npm", "run", "server"]
+CMD ["nginx", "-g", "daemon off;"]
 
 
