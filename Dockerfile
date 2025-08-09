@@ -33,9 +33,6 @@ RUN sh -c "envsubst 8080 < /etc/nginx/conf.d/configfile.template > /etc/nginx/co
 # Copy the static files from the build stage to the directory Nginx serves files from
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# replace default nginx config to listen on 8080 (Cloud Run can route to any port)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
 EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
