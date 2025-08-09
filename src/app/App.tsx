@@ -59,11 +59,11 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (overlayMode === "intro") {
-            loadTextFile("./LandingPage.html").then((data) => {
+            loadTextFile("/LandingPage.html").then((data) => {
                 setOverlayText(data ?? "");
             });
         } else {
-            loadTextFile("./About.html").then((data) => {
+            loadTextFile("/About.html").then((data) => {
                 setOverlayText(data ?? "");
             });
         }
@@ -113,7 +113,7 @@ const App: React.FC = () => {
                         }}
                     >
                         <img
-                            src="./uniofbath.png"
+                            src={"/uniofbath.png"}
                             alt="University of Bath"
                             style={{
                                 backgroundColor: "#fff",
@@ -123,7 +123,7 @@ const App: React.FC = () => {
                             }}
                         />
                         <img
-                            src="./councillogo.png"
+                            src={"/councillogo.png"}
                             alt="University of Bath"
                             style={{
                                 backgroundColor: "#fff",
