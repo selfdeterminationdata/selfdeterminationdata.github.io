@@ -14,7 +14,7 @@ import "./maplibre-fix.css";
 const loadTextFile = (filePath: string): Promise<string | undefined> => {
     return fetch(filePath)
         .then((response) => {
-            if (!response.ok) throw new Error(`HTTP errors! status: ${response.status}`);
+            if (!response.ok) throw new Error(`HTTP errorsi! status: ${response.status}`);
             return response.text();
         })
         .then((data) => {
