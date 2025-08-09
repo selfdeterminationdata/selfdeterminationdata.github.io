@@ -8,7 +8,6 @@
   "scripts": {
     "develop": "webpack-cli serve --mode=development --env development --open --hot",
     "build": "webpack --mode=production --config webpack.config.js",
-    "prod": "",
     "lint": "eslint './src/app/**/*.{ts,tsx,js,jsx}'",
     "lint:fix": "eslint './src/app/**/*.{ts,tsx,js,jsx}' --fix"
   },
