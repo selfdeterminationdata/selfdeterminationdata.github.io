@@ -31,12 +31,11 @@ ENV HOST 0.0.0.0
 RUN sh -c "envsubst 8080 < /etc/nginx/conf.d/configfile.template > /etc/nginx/conf.d/default.conf"
 
 # Copy the static files from the build stage to the directory Nginx serves files from
-COPY --from=build /selfdeterminationdata_code/dist /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 8080 to allow access to the application
+# replace default nginx config to listen on 8080 (Cloud Run can route to any port)
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 8080
 
-# Start Nginx in the foreground so the container keeps running
 CMD ["nginx", "-g", "daemon off;"]
-
-
