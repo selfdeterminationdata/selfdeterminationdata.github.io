@@ -64,7 +64,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
             return;
         }
 
-        fetch(`http://localhost:3000/periods/groupIDS`, {
+        fetch(`https://selfdeterminationdata-codebackend-19450166485.europe-west1.run.app/periods/groupIDS`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

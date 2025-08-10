@@ -40,6 +40,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
     const [showStylePanel, setShowStylePanel] = React.useState(false);
     const mapRef = React.useRef<MaplibreMap | null>(null);
     const [polygonData, setPolygonData] = React.useState<GeoJSON.Geometry | null>(null);
+    const backendURL = "https://selfdeterminationdata-codebackend-19450166485.europe-west1.run.app";
     const colorArray = [
         "#1E3A8A",
         "#3B82F6",
@@ -62,17 +63,17 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
         if (selection == null || selection == "") {
             return;
         }
-        fetch(`http://localhost:3000/geometries/ccode/${selection}/${yearSelected}`)
+        fetch(`${backendURL}/geometries/ccode/${selection}/${yearSelected}`)
             .then((res) => res.json())
             .then(async (data) => {
                 await setPolygonData(JSON.parse(data[0]?.multipoly));
             });
-        fetch(`http://localhost:3000/groups/country/${selection}`)
+        fetch(`${backendURL}/groups/country/${selection}`)
             .then((res) => res.json())
             .then(async (data) => {
                 const groupIDSList = await data.map((groupData) => groupData?.groupid);
                 setGroupOfSelection(groupIDSList);
-                fetch(`http://localhost:3000/geometries/groupIDS/${yearSelected}`, {
+                fetch(`${backendURL}/geometries/groupIDS/${yearSelected}`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
