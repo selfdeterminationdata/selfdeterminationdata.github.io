@@ -16,7 +16,9 @@ const SearchBar: React.FC<SearchBarProps> = ({onSelect, onCountrySelect}) => {
     const [countriesList, setCountriesList] = useState<CountryOption[]>([]);
 
     useEffect(() => {
-        fetch("https://selfdeterminationdata-codebackend-19450166485.europe-west1.run.app/countries")
+        fetch(
+            "https://selfdeterminationdata-codebackend-19450166485.europe-west1.run.app/countries"
+        )
             .then((response) => response.json())
             .then((data) => {
                 const countryList = data.map((country) => ({

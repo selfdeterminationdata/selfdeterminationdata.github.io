@@ -64,13 +64,16 @@ const GroupGrid: React.FC<GroupGridProps> = ({
             return;
         }
 
-        fetch(`https://selfdeterminationdata-codebackend-19450166485.europe-west1.run.app/periods/groupIDS`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({groupIDS: groupsOfSelected})
-        })
+        fetch(
+            `https://selfdeterminationdata-codebackend-19450166485.europe-west1.run.app/periods/groupIDS`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({groupIDS: groupsOfSelected})
+            }
+        )
             .then((res) => res.json())
             .then((data) => {
                 const rowsData: RowData[] = data.map((groupData: GroupDataType) => ({
