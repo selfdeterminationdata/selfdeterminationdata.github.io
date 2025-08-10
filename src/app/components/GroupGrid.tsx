@@ -98,7 +98,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     const columns: GridColDef[] = [
         {
             field: "name",
-            headerName: "Self-determination Movement",
+            headerName: "Year Selection",
             width: 200,
             headerAlign: "center",
             align: "center",
