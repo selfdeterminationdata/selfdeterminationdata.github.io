@@ -58,7 +58,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     searchSelection
 }) => {
     const [rowsGrid, setRowsGrid] = React.useState<RowData[]>([]);
-
+    const [scrollLeft, setScrollLeft] = useState(0);
     React.useEffect(() => {
         if (!groupsOfSelected || groupsOfSelected.length === 0) {
             return;
@@ -128,6 +128,8 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                         endYear={2020}
                         backgroundColor="grey"
                         highlightRanges={params.row.highlightRanges}
+                        scrollLeft={scrollLeft}
+                        onScrollLeftChange={setScrollLeft}
                     />
                 </div>
             ),
@@ -146,6 +148,8 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                         endYear={2020}
                         initialValue={2020}
                         handleChangeHelper={setYearSelected}
+                        scrollLeft={scrollLeft}
+                        onScrollLeftChange={setScrollLeft}
                     />
                 </div>
             )

@@ -1,7 +1,6 @@
-import React, {useRef, useState, useEffect, useId, useCallback} from "react";
+import React, {useRef, useState, useEffect} from "react";
 import {Slider, Box, IconButton} from "@mui/material";
 import {ChevronLeft, ChevronRight} from "@mui/icons-material";
-import {useScrollStore} from "./scrollStore";
 
 type HighlightRange = {
     from: number;
@@ -20,6 +19,10 @@ type TimeLineSliderProps = {
     highlightRanges?: HighlightRange[];
     disable?: boolean;
     handleChangeHelper?: (year: number) => void;
+
+    // NEW props for scroll syncing
+    scrollLeft: number;
+    onScrollLeftChange: (val: number) => void;
 };
 
 const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
@@ -31,23 +34,14 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
     backgroundColor = "#663399",
     initialValue = 1945,
     highlightRanges,
-    handleChangeHelper
+    handleChangeHelper,
+    scrollLeft,
+    onScrollLeftChange
 }) => {
     const [value, setValue] = useState<number>(initialValue);
-
-    const id = useId();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const {scrollLeft, setScrollLeft, lastSource} = useScrollStore();
-
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(true);
-
-    const handleChange = (_: Event, newValue: number | number[]) => {
-        if (typeof newValue === "number") {
-            handleChangeHelper?.(newValue);
-            setValue(newValue);
-        }
-    };
 
     const legendItems = [
         {label: "Autonomy", color: "#90ee90"},
@@ -58,51 +52,47 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
 
     const generateBackgroundColor = (range: HighlightRange) => {
         const idx = legendItems.findIndex((el) => el.label === range?.claim);
-        return idx !== -1 ? legendItems[idx]?.color : "#A9A9A9";
+        return idx !== -1 ? legendItems[idx].color : "#A9A9A9";
+    };
+
+    const handleChange = (_: Event, newValue: number | number[]) => {
+        if (typeof newValue === "number") {
+            handleChangeHelper?.(newValue);
+            setValue(newValue);
+        }
     };
 
     const marks = [];
     for (let year = startYear; year <= endYear; year++) {
-        const showLabel = year % 5 === 0;
-        marks.push({
-            value: year,
-            ...(showLabel && {label: `${year}`})
-        });
+        marks.push({value: year, ...(year % 5 === 0 && {label: `${year}`})});
     }
 
     const scrollBy = (offset: number) => {
         const el = scrollContainerRef.current;
         if (el) {
             el.scrollBy({left: offset, behavior: "smooth"});
-            setScrollLeft(el.scrollLeft + offset, id);
         }
     };
 
-    const handleScroll = useCallback(() => {
+    const handleScroll = () => {
         const el = scrollContainerRef.current;
         if (!el) return;
-        setScrollLeft(el.scrollLeft, id);
         setShowLeftArrow(el.scrollLeft > 0);
         setShowRightArrow(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
-    }, [id, setScrollLeft]);
+        onScrollLeftChange(el.scrollLeft); // send scroll pos to parent
+    };
 
-    // Sync to store updates from other sliders
-    useEffect(() => {
-        if (lastSource === id) return; // skip if we caused it
-        const el = scrollContainerRef.current;
-        if (el && el.scrollLeft !== scrollLeft) {
-            el.scrollLeft = scrollLeft; // instant update
-        }
-    }, [scrollLeft, lastSource, id]);
-
-    // Ensure newly mounted sliders start in sync
+    // Sync when parent scrollLeft changes
     useEffect(() => {
         const el = scrollContainerRef.current;
-        if (el) {
-            el.scrollLeft = scrollLeft;
-            handleScroll();
+        if (el && Math.abs(el.scrollLeft - scrollLeft) > 1) {
+            el.scrollTo({left: scrollLeft});
         }
-    }, [scrollLeft, handleScroll]);
+    }, [scrollLeft]);
+
+    useEffect(() => {
+        handleScroll();
+    }, []);
 
     return (
         <Box width={width} height={height} display="flex" alignItems="center" position="relative">
@@ -167,16 +157,16 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                                         backgroundColor: generateBackgroundColor(range),
                                         backgroundImage: range?.violence
                                             ? `repeating-linear-gradient(
-                            45deg,
-                            rgba(255, 255, 255, 0.7) 0,
-                            rgba(255, 255, 255, 0.7) 5px,
-                            transparent 10px,
-                            transparent 20px
-                          )`
+                          45deg,
+                          rgba(255, 255, 255, 0.7) 0,
+                          rgba(255, 255, 255, 0.7) 5px,
+                          transparent 10px,
+                          transparent 20px
+                        )`
                                             : "none",
                                         borderRadius: "3px"
                                     }}
-                                />
+                                ></Box>
                             );
                         })}
                     </Box>
@@ -194,17 +184,23 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                             position: "relative",
                             zIndex: 2,
                             color: backgroundColor,
-                            "& .MuiSlider-markLabel": {fontSize: "0.75rem"},
+                            "& .MuiSlider-markLabel": {
+                                fontSize: "0.75rem"
+                            },
                             "& .MuiSlider-valueLabel": {
                                 fontSize: "0.7rem",
                                 backgroundColor: backgroundColor,
                                 padding: "2px 6px",
                                 borderRadius: "4px",
                                 top: 40,
-                                "&:before": {transform: "scale(0.6)"}
+                                "&:before": {
+                                    transform: "scale(0.6)"
+                                }
                             },
                             ...(disable && {
-                                "& .MuiSlider-thumb": {display: "none"}
+                                "& .MuiSlider-thumb": {
+                                    display: "none"
+                                }
                             })
                         }}
                     />
