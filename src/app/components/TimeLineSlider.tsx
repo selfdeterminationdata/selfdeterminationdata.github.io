@@ -18,9 +18,6 @@ type TimeLineSliderProps = {
     initialValue?: number;
     highlightRanges?: HighlightRange[];
     disable?: boolean;
-    handleChangeHelper?: (year: number) => void;
-
-    // NEW props for scroll syncing
     scrollLeft: number;
     onScrollLeftChange: (val: number) => void;
 };
@@ -34,7 +31,6 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
     backgroundColor = "#663399",
     initialValue = 1945,
     highlightRanges,
-    handleChangeHelper,
     scrollLeft,
     onScrollLeftChange
 }) => {
@@ -55,52 +51,103 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
         return idx !== -1 ? legendItems[idx].color : "#A9A9A9";
     };
 
-    const handleChange = (_: Event, newValue: number | number[]) => {
-        if (typeof newValue === "number") {
-            handleChangeHelper?.(newValue);
-            setValue(newValue);
+    // Scroll sync and animation refs
+    const isSyncingFromParent = useRef(false);
+    const scrollAnimationFrame = useRef<number | null>(null);
+    const scrollEaseFrame = useRef<number | null>(null);
+    const currentTargetScroll = useRef<number | null>(null);
+
+    const handleScroll = () => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+
+        setShowLeftArrow(el.scrollLeft > 0);
+        setShowRightArrow(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
+
+        if (!isSyncingFromParent.current) {
+            if (scrollAnimationFrame.current) {
+                cancelAnimationFrame(scrollAnimationFrame.current);
+            }
+            scrollAnimationFrame.current = requestAnimationFrame(() => {
+                onScrollLeftChange(el.scrollLeft);
+            });
         }
     };
+
+    // Smoothly animate scroll with easing, distance-based duration, and click merging
+    const animateScrollTo = (target: number) => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+
+        if (scrollEaseFrame.current) {
+            cancelAnimationFrame(scrollEaseFrame.current);
+        }
+
+        const start = el.scrollLeft;
+        const distance = target - start;
+        if (Math.abs(distance) < 1) return;
+
+        // Duration scales with distance, min 200ms, max 800ms
+        const duration = Math.min(Math.max(Math.abs(distance) * 0.5, 200), 800);
+
+        const startTime = performance.now();
+        currentTargetScroll.current = target;
+
+        const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+
+        const step = (time: number) => {
+            const progress = Math.min((time - startTime) / duration, 1);
+            el.scrollLeft = start + distance * easeInOutQuad(progress);
+            if (progress < 1) {
+                scrollEaseFrame.current = requestAnimationFrame(step);
+            }
+        };
+
+        scrollEaseFrame.current = requestAnimationFrame(step);
+    };
+
+    // When parent changes scrollLeft
+    useEffect(() => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+
+        if (Math.abs(el.scrollLeft - scrollLeft) > 1) {
+            isSyncingFromParent.current = true;
+            animateScrollTo(scrollLeft);
+            setTimeout(() => {
+                isSyncingFromParent.current = false;
+            }, 800); // longest possible animation
+        }
+    }, [scrollLeft]);
+
+    useEffect(() => {
+        handleScroll();
+        return () => {
+            if (scrollAnimationFrame.current) {
+                cancelAnimationFrame(scrollAnimationFrame.current);
+            }
+            if (scrollEaseFrame.current) {
+                cancelAnimationFrame(scrollEaseFrame.current);
+            }
+        };
+    }, []);
 
     const marks = [];
     for (let year = startYear; year <= endYear; year++) {
         marks.push({value: year, ...(year % 5 === 0 && {label: `${year}`})});
     }
 
-    const scrollBy = (offset: number) => {
-        const el = scrollContainerRef.current;
-        if (el) {
-            el.scrollBy({left: offset, behavior: "smooth"});
-        }
-    };
-
-    const handleScroll = () => {
-        const el = scrollContainerRef.current;
-        if (!el) return;
-        setShowLeftArrow(el.scrollLeft > 0);
-        setShowRightArrow(el.scrollLeft + el.clientWidth < el.scrollWidth - 10);
-        onScrollLeftChange(el.scrollLeft); // send scroll pos to parent
-    };
-
-    // Sync when parent scrollLeft changes
-    useEffect(() => {
-        const el = scrollContainerRef.current;
-        if (el && Math.abs(el.scrollLeft - scrollLeft) > 1) {
-            el.scrollTo({left: scrollLeft});
-        }
-    }, [scrollLeft]);
-
-    useEffect(() => {
-        handleScroll();
-    }, []);
-
     return (
         <Box width={width} height={height} display="flex" alignItems="center" position="relative">
             {showLeftArrow && (
                 <IconButton
-                    onClick={() => scrollBy(-200)}
+                    onClick={() => {
+                        const el = scrollContainerRef.current;
+                        if (!el) return;
+                        const target = (currentTargetScroll.current ?? el.scrollLeft) - 200;
+                        animateScrollTo(Math.max(0, target));
+                    }}
                     sx={{position: "absolute", left: 0, zIndex: 10}}
-                    aria-label="Scroll left"
                 >
                     <ChevronLeft fontSize="small" />
                 </IconButton>
@@ -166,7 +213,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                                             : "none",
                                         borderRadius: "3px"
                                     }}
-                                ></Box>
+                                />
                             );
                         })}
                     </Box>
@@ -178,29 +225,27 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                         max={endYear}
                         step={1}
                         marks={marks}
-                        onChange={handleChange}
+                        onChange={(_, newValue) => {
+                            if (typeof newValue === "number") {
+                                setValue(newValue);
+                            }
+                        }}
                         valueLabelDisplay="auto"
                         sx={{
                             position: "relative",
                             zIndex: 2,
                             color: backgroundColor,
-                            "& .MuiSlider-markLabel": {
-                                fontSize: "0.75rem"
-                            },
+                            "& .MuiSlider-markLabel": {fontSize: "0.75rem"},
                             "& .MuiSlider-valueLabel": {
                                 fontSize: "0.7rem",
                                 backgroundColor: backgroundColor,
                                 padding: "2px 6px",
                                 borderRadius: "4px",
                                 top: 40,
-                                "&:before": {
-                                    transform: "scale(0.6)"
-                                }
+                                "&:before": {transform: "scale(0.6)"}
                             },
                             ...(disable && {
-                                "& .MuiSlider-thumb": {
-                                    display: "none"
-                                }
+                                "& .MuiSlider-thumb": {display: "none"}
                             })
                         }}
                     />
@@ -209,9 +254,13 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
 
             {showRightArrow && (
                 <IconButton
-                    onClick={() => scrollBy(200)}
+                    onClick={() => {
+                        const el = scrollContainerRef.current;
+                        if (!el) return;
+                        const target = (currentTargetScroll.current ?? el.scrollLeft) + 200;
+                        animateScrollTo(Math.min(el.scrollWidth - el.clientWidth, target));
+                    }}
                     sx={{position: "absolute", right: 0, zIndex: 10}}
-                    aria-label="Scroll right"
                 >
                     <ChevronRight fontSize="small" />
                 </IconButton>

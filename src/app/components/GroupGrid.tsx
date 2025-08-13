@@ -58,7 +58,13 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     searchSelection
 }) => {
     const [rowsGrid, setRowsGrid] = React.useState<RowData[]>([]);
-    const [scrollLeft, setScrollLeft] = React.useState(0);
+    const totalYears = 2020 - 1945; // e.g., 2020 - 1945 = 75
+    const pixelsPerYear = 30; // as in your Box width calculation
+    const containerVisibleWidth = 600; // your minWidth or actual container width
+
+    const initialScrollLeft = totalYears * pixelsPerYear - containerVisibleWidth;
+
+    const [scrollLeft, setScrollLeft] = React.useState(initialScrollLeft);
     React.useEffect(() => {
         if (!groupsOfSelected || groupsOfSelected.length === 0) {
             return;
