@@ -58,7 +58,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     searchSelection
 }) => {
     const [rowsGrid, setRowsGrid] = React.useState<RowData[]>([]);
-    const [scrollLeft, setScrollLeft] = useState(0);
+    const [scrollLeft, setScrollLeft] = React.useState(0);
     React.useEffect(() => {
         if (!groupsOfSelected || groupsOfSelected.length === 0) {
             return;
