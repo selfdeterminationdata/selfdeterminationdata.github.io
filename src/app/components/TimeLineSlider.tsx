@@ -18,8 +18,11 @@ type TimeLineSliderProps = {
     initialValue?: number;
     highlightRanges?: HighlightRange[];
     disable?: boolean;
+
     scrollLeft: number;
     onScrollLeftChange: (val: number) => void;
+
+    handleChangeHelper?: (year: number) => void;
 };
 
 const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
@@ -31,6 +34,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
     backgroundColor = "#663399",
     initialValue = 1945,
     highlightRanges,
+    handleChangeHelper,
     scrollLeft,
     onScrollLeftChange
 }) => {
@@ -228,6 +232,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                         onChange={(_, newValue) => {
                             if (typeof newValue === "number") {
                                 setValue(newValue);
+                                handleChangeHelper?.(newValue);
                             }
                         }}
                         valueLabelDisplay="auto"
