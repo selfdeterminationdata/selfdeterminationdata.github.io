@@ -104,7 +104,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     const columns: GridColDef[] = [
         {
             field: "name",
-            headerName: "Year Selection",
+            headerName: "Year selection",
             width: 200,
             headerAlign: "center",
             align: "center",

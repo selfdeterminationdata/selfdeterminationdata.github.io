@@ -34,7 +34,7 @@ const FileDownloadIcon: React.FC<FileDownloadIconProps> = ({searchSelection}) =>
     };
 
     return (
-        <Tooltip title="Coding Notes" arrow>
+        <Tooltip title="Coding notes" arrow>
             <IconButton onClick={handleClick} aria-label="download coding file">
                 <DescriptionIcon />
             </IconButton>
