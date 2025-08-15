@@ -12,12 +12,12 @@ type HighlightRange = {
 type TimeLineSliderProps = {
     width?: string;
     height?: string;
-    startYear: number;
-    endYear: number;
     backgroundColor?: string;
     initialValue?: number;
     highlightRanges?: HighlightRange[];
     disable?: boolean;
+    startYear: number;
+    endYear: number;
 
     scrollLeft: number;
     onScrollLeftChange: (val: number) => void;
@@ -29,10 +29,10 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
     width = "100%",
     height = "120px",
     disable = false,
-    startYear,
-    endYear,
     backgroundColor = "#663399",
     initialValue = 1945,
+    startYear,
+    endYear,
     highlightRanges,
     handleChangeHelper,
     scrollLeft,
@@ -78,7 +78,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
         }
     };
 
-    // Smoothly animate scroll with easing, distance-based duration, and click merging
+    // Smoothly animate scroll with easing
     const animateScrollTo = (target: number) => {
         const el = scrollContainerRef.current;
         if (!el) return;
@@ -91,9 +91,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
         const distance = target - start;
         if (Math.abs(distance) < 1) return;
 
-        // Duration scales with distance, min 200ms, max 800ms
         const duration = Math.min(Math.max(Math.abs(distance) * 0.5, 200), 800);
-
         const startTime = performance.now();
         currentTargetScroll.current = target;
 
@@ -120,19 +118,15 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
             animateScrollTo(scrollLeft);
             setTimeout(() => {
                 isSyncingFromParent.current = false;
-            }, 800); // longest possible animation
+            }, 800);
         }
     }, [scrollLeft]);
 
     useEffect(() => {
         handleScroll();
         return () => {
-            if (scrollAnimationFrame.current) {
-                cancelAnimationFrame(scrollAnimationFrame.current);
-            }
-            if (scrollEaseFrame.current) {
-                cancelAnimationFrame(scrollEaseFrame.current);
-            }
+            if (scrollAnimationFrame.current) cancelAnimationFrame(scrollAnimationFrame.current);
+            if (scrollEaseFrame.current) cancelAnimationFrame(scrollEaseFrame.current);
         };
     }, []);
 
@@ -141,16 +135,27 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
         marks.push({value: year, ...(year % 5 === 0 && {label: `${year}`})});
     }
 
+    const scrollOneYear = (direction: "left" | "right") => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+
+        const totalYears = endYear - startYear;
+        const scrollableWidth = el.scrollWidth;
+        const oneYearScroll = scrollableWidth / totalYears;
+
+        let target =
+            (currentTargetScroll.current ?? el.scrollLeft) +
+            (direction === "left" ? -oneYearScroll : oneYearScroll);
+
+        target = Math.max(0, Math.min(el.scrollWidth - el.clientWidth, target));
+        animateScrollTo(target);
+    };
+
     return (
         <Box width={width} height={height} display="flex" alignItems="center" position="relative">
-            {showLeftArrow && (
+            {showLeftArrow && !disable && (
                 <IconButton
-                    onClick={() => {
-                        const el = scrollContainerRef.current;
-                        if (!el) return;
-                        const target = (currentTargetScroll.current ?? el.scrollLeft) - 200;
-                        animateScrollTo(Math.max(0, target));
-                    }}
+                    onClick={() => scrollOneYear("left")}
                     sx={{position: "absolute", left: 0, zIndex: 10}}
                 >
                     <ChevronLeft fontSize="small" />
@@ -209,12 +214,18 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                                         backgroundImage: range?.violence
                                             ? `repeating-linear-gradient(
                           45deg,
-                          rgba(255, 255, 255, 0.7) 0,
-                          rgba(255, 255, 255, 0.7) 5px,
-                          transparent 10px,
-                          transparent 20px
+                          rgba(255, 255, 255, 0.3) 0,
+                          rgba(255, 255, 255, 0.3) 5px,
+                          red 10px,
+                          red 20px
                         )`
-                                            : "none",
+                                            : `repeating-linear-gradient(
+                                                                        45deg,
+                                                                        rgba(255, 255, 255, 0.7) 0,
+                                                                        rgba(255, 255, 255, 0.7) 5px,
+                                                                        transparent 10px,
+                                                                        transparent 20px
+                                                                      )`,
                                         borderRadius: "3px"
                                     }}
                                 />
@@ -230,9 +241,30 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                         step={1}
                         marks={marks}
                         onChange={(_, newValue) => {
-                            if (typeof newValue === "number") {
-                                setValue(newValue);
-                                handleChangeHelper?.(newValue);
+                            if (typeof newValue !== "number") return;
+
+                            setValue(newValue);
+                            handleChangeHelper?.(newValue);
+
+                            const el = scrollContainerRef.current;
+                            if (!el) return;
+
+                            const totalYears = endYear - startYear;
+                            const scrollableWidth = el.scrollWidth;
+                            const containerWidth = el.clientWidth;
+                            const thumbLeft =
+                                ((newValue - startYear) / totalYears) * scrollableWidth;
+                            const padding = 40;
+
+                            if (thumbLeft < el.scrollLeft + padding) {
+                                animateScrollTo(Math.max(0, thumbLeft - padding));
+                            } else if (thumbLeft > el.scrollLeft + containerWidth - padding) {
+                                animateScrollTo(
+                                    Math.min(
+                                        el.scrollWidth - containerWidth,
+                                        thumbLeft - containerWidth + padding
+                                    )
+                                );
                             }
                         }}
                         valueLabelDisplay="auto"
@@ -257,14 +289,9 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                 </Box>
             </Box>
 
-            {showRightArrow && (
+            {showRightArrow && !disable && (
                 <IconButton
-                    onClick={() => {
-                        const el = scrollContainerRef.current;
-                        if (!el) return;
-                        const target = (currentTargetScroll.current ?? el.scrollLeft) + 200;
-                        animateScrollTo(Math.min(el.scrollWidth - el.clientWidth, target));
-                    }}
+                    onClick={() => scrollOneYear("right")}
                     sx={{position: "absolute", right: 0, zIndex: 10}}
                 >
                     <ChevronRight fontSize="small" />

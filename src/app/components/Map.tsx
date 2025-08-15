@@ -40,58 +40,79 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
     const [showStylePanel, setShowStylePanel] = React.useState(false);
     const mapRef = React.useRef<MaplibreMap | null>(null);
     const [polygonData, setPolygonData] = React.useState<GeoJSON.Geometry | null>(null);
+    const hasZoomedRef = React.useRef(false);
     const backendURL = "https://selfdeterminationdata-codebackend-19450166485.europe-west1.run.app";
     const colorArray = [
-        "#1E3A8A",
-        "#3B82F6",
-        "#06B6D4",
-        "#10B981",
-        "#84CC16",
-        "#F59E0B",
-        "#EF4444",
-        "#EC4899",
-        "#8B5CF6",
-        "#14B8A6",
-        "#FB7185",
-        "#6366F1",
-        "#0D9488",
-        "#D946EF",
-        "#FACC15"
+        "#1E3A8A", // dark blue
+        "#F59E0B", // orange
+        "#06B6D4", // cyan
+        "#EF4444", // red
+        "#84CC16", // lime green
+        "#EC4899", // pink
+        "#3B82F6", // bright blue
+        "#FACC15", // yellow
+        "#0D9488", // dark teal
+        "#D946EF", // purple
+        "#14B8A6", // teal
+        "#FB7185", // rose
+        "#6366F1", // indigo
+        "#10B981", // emerald green
+        "#8B5CF6" // violet
     ];
 
     React.useEffect(() => {
-        if (selection == null || selection == "") {
-            return;
-        }
-        fetch(`${backendURL}/geometries/ccode/${selection}/${yearSelected}`)
-            .then((res) => res.json())
-            .then(async (data) => {
-                await setPolygonData(JSON.parse(data[0]?.multipoly));
-            });
-        fetch(`${backendURL}/groups/country/${selection}`)
-            .then((res) => res.json())
-            .then(async (data) => {
-                const groupIDSList = await data.map((groupData) => groupData?.groupid);
+        if (!selection) return; // covers null, undefined, and empty string
+
+        const fetchData = async () => {
+            try {
+                // --- Fetch polygon data ---
+                const polygonRes = await fetch(
+                    `${backendURL}/geometries/ccode/${selection}/${yearSelected}`
+                );
+                const polygonDataRes = await polygonRes.json();
+                const multipoly = polygonDataRes[0]?.multipoly;
+                setPolygonData(multipoly ? JSON.parse(multipoly) : null);
+
+                // --- Fetch group IDs ---
+                const groupsRes = await fetch(`${backendURL}/groups/country/${selection}`);
+                const groupsData = await groupsRes.json();
+                const groupIDSList = groupsData.map((group) => group?.groupid).filter(Boolean);
+                console.log(groupIDSList);
                 setGroupOfSelection(groupIDSList);
-                fetch(`${backendURL}/geometries/groupIDS/${yearSelected}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({groupIDS: groupIDSList})
-                })
-                    .then((res) => res.json())
-                    .then(async (groupGeomsData) => {
-                        const groupGeomList: GeometryObj[] = await groupGeomsData.map(
-                            (groupData) => ({
-                                groupName: groupData?.groupname,
-                                geom: JSON.parse(groupData?.multipoly)
-                            })
-                        );
-                        await setGroupGeom(groupGeomList);
-                        await setGroupGeomToDisplay(groupGeomList);
-                    });
-            });
+
+                if (groupIDSList.length === 0) {
+                    setGroupGeom([]);
+                    setGroupGeomToDisplay([]);
+                    return;
+                }
+
+                // --- Fetch group geometries ---
+                const groupGeomsRes = await fetch(
+                    `${backendURL}/geometries/groupIDS/${yearSelected}`,
+                    {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({groupIDS: groupIDSList})
+                    }
+                );
+                const groupGeomsData = await groupGeomsRes.json();
+
+                const groupGeomList: GeometryObj[] = groupGeomsData.map((groupData) => ({
+                    groupName: groupData?.groupname || "",
+                    geom: groupData?.multipoly ? JSON.parse(groupData.multipoly) : null
+                }));
+
+                setGroupGeom(groupGeomList);
+                setGroupGeomToDisplay(groupGeomList);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                setPolygonData(null);
+                setGroupGeom([]);
+                setGroupGeomToDisplay([]);
+            }
+        };
+
+        fetchData();
     }, [selection, yearSelected, setGroupOfSelection]);
 
     React.useEffect(() => {
@@ -107,6 +128,10 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
             setGroupGeomToDisplay(groupGeom);
         }
     }, [specificRow, groupGeom]);
+
+    React.useEffect(() => {
+        hasZoomedRef.current = false;
+    }, [selection]);
 
     React.useEffect(() => {
         setFlag((f) => f + 1);
@@ -148,7 +173,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
             }
         });
 
-        groupGeomToDisplay?.forEach((geomObj, index) => {
+        groupGeomToDisplay?.forEach((geomObj) => {
             map.addSource(geomObj.groupName, {
                 type: "geojson",
                 data: {
@@ -161,8 +186,8 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
                 type: "fill",
                 source: geomObj.groupName,
                 paint: {
-                    "fill-color": colorArray[index % 15],
-                    "fill-opacity": 0.8
+                    "fill-color": colorArray[groupGeom.findIndex((el) => el === geomObj) % 15],
+                    "fill-opacity": 0.6
                 }
             });
             map.addLayer({
@@ -170,8 +195,8 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
                 type: "line",
                 source: geomObj.groupName,
                 paint: {
-                    "line-color": "#000",
-                    "line-width": 2
+                    "line-color": colorArray[groupGeom.findIndex((el) => el === geomObj) % 15],
+                    "line-width": 3.5
                 }
             });
             const labelFeature = centroid(geoJSONFeatureFunc(geomObj));
@@ -209,8 +234,18 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
             }
         });
 
-        const [minX, minY, maxX, maxY] = bbox(groupGeoJSON);
-        map.fitBounds([minX, minY, maxX, maxY], {padding: 40, duration: 1000});
+        // Bounds logic
+        const [minX, minY, maxX, maxY] =
+            groupGeomToDisplay.length == 1
+                ? bbox(geoJSONFeatureFunc(groupGeomToDisplay[0]))
+                : bbox(groupGeoJSON);
+
+        map.fitBounds([minX, minY, maxX, maxY], {
+            padding: 40,
+            duration: hasZoomedRef.current ? 0 : 1000 // <- No animation after first time
+        });
+
+        hasZoomedRef.current = true;
     };
 
     return (

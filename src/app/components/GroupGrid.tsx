@@ -24,6 +24,14 @@ interface GroupDataType {
     geoid?: number;
     groupname?: string | null;
 }
+function getYearBounds(ranges: HighlightRange[]): {startYear: number; endYear: number} | null {
+    if (!ranges || ranges.length === 0) return null;
+
+    const startYear = Math.min(...ranges.map((r) => r.from));
+    const endYear = Math.max(...ranges.map((r) => r.to));
+
+    return {startYear, endYear};
+}
 
 const generateRowProps = (rowsArray: RowData[]): RowData[] => {
     const rowProps: RowData[] = [];
@@ -58,13 +66,8 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     searchSelection
 }) => {
     const [rowsGrid, setRowsGrid] = React.useState<RowData[]>([]);
-    const totalYears = 2020 - 1945; // e.g., 2020 - 1945 = 75
-    const pixelsPerYear = 30; // as in your Box width calculation
-    const containerVisibleWidth = 600; // your minWidth or actual container width
-
-    const initialScrollLeft = totalYears * pixelsPerYear - containerVisibleWidth;
-
-    const [scrollLeft, setScrollLeft] = React.useState(initialScrollLeft);
+    const [startYear, setStartYear] = React.useState(1945);
+    const [endYear, setEndYear] = React.useState(2020);
     React.useEffect(() => {
         if (!groupsOfSelected || groupsOfSelected.length === 0) {
             return;
@@ -94,28 +97,63 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                         }
                     ]
                 }));
-
+                const allHighlightRanges = rowsData.flatMap((row) => row.highlightRanges);
+                const bounds = getYearBounds(allHighlightRanges);
+                setStartYear(bounds?.startYear ?? 1945);
+                setEndYear(bounds?.endYear ?? 2020);
                 setRowsGrid(generateRowProps(rowsData));
                 setSpecificRowSelection("");
             })
             .catch((err) => console.error("Error fetching data:", err));
     }, [groupsOfSelected, setSpecificRowSelection]);
 
+    const totalYears = endYear - startYear; // e.g., 2020 - 1945 = 75
+    const pixelsPerYear = 30; // as in your Box width calculation
+    const containerVisibleWidth = 600; // your minWidth or actual container width
+    const initialScrollLeft = totalYears * pixelsPerYear - containerVisibleWidth;
+    const [scrollLeft, setScrollLeft] = React.useState(initialScrollLeft);
     const columns: GridColDef[] = [
         {
             field: "name",
             headerName: "Year selection",
             width: 200,
-            headerAlign: "center",
-            align: "center",
-            renderCell: (params) => <div style={{padding: "8px 12px"}}>{params.value}</div>
+            headerAlign: "left",
+            align: "left",
+            renderCell: (params) => (
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center", // vertical center
+                        width: "100%",
+                        height: "100%",
+                        padding: "0px 12px",
+                        boxSizing: "border-box"
+                    }}
+                >
+                    {params.value}
+                </div>
+            ),
+            renderHeader: () => (
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center", // vertical center
+                        width: "100%",
+                        height: "100%",
+                        padding: "0px 12px",
+                        boxSizing: "border-box"
+                    }}
+                >
+                    Year selection
+                </div>
+            )
         },
         {
             field: "description",
             headerName: "Timeline",
             sortable: false,
             headerAlign: "center",
-            align: "center",
+            align: "left",
             flex: 1,
             renderCell: (params) => (
                 <div
@@ -129,9 +167,9 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                     <TimeLineSlider
                         width="1000px"
                         height="60px"
+                        startYear={startYear}
+                        endYear={endYear}
                         disable={true}
-                        startYear={1945}
-                        endYear={2020}
                         backgroundColor="grey"
                         highlightRanges={params.row.highlightRanges}
                         scrollLeft={scrollLeft}
@@ -150,9 +188,9 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                     <TimeLineSlider
                         width="1000px"
                         height="60px"
-                        startYear={1945}
-                        endYear={2020}
-                        initialValue={2020}
+                        startYear={startYear}
+                        endYear={endYear}
+                        initialValue={endYear}
                         handleChangeHelper={setYearSelected}
                         scrollLeft={scrollLeft}
                         onScrollLeftChange={setScrollLeft}
@@ -169,6 +207,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                 columns={columns}
                 hideFooter
                 getRowHeight={() => "auto"}
+                disableColumnMenu
                 onRowSelectionModelChange={(params) => {
                     setSpecificRowSelection(
                         Array.from(params?.ids).length == 1

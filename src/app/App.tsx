@@ -133,7 +133,7 @@ const App: React.FC = () => {
                         />
                     </div>
                     <h1 style={{marginBottom: "1rem"}}>
-                        {overlayMode === "intro" ? "SDM 2.0" : "About This App"}
+                        {overlayMode === "intro" ? "SDM 2.0" : "About"}
                     </h1>
                     <div
                         style={{

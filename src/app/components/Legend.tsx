@@ -9,7 +9,7 @@ type LegendItem = {
 export const legendItems: LegendItem[] = [
     {label: "Autonomy", color: "#90ee90"}, // Light green
     {label: "Sub-state secession", color: "#006400"}, // Dark green
-    {label: "Independence", color: "#add8e6"}, // Light blue
+    {label: "Independence", color: "#6CA0DC"}, // Light blue
     {label: "Irredentism", color: "#00008b"} // Dark blue
 ];
 
@@ -48,7 +48,7 @@ const Legend: React.FC = () => {
             </div>
 
             {/* Campaign type legend */}
-            <div style={{display: "flex", alignItems: "center", gap: "10px"}}>
+            <div style={{display: "flex", alignItems: "center", gap: "10px", paddingLeft: "10vw"}}>
                 <span style={{fontWeight: "bold"}}>Campaign type:</span>
                 <div style={{display: "flex", alignItems: "center", gap: "4px"}}>
                     <div
@@ -63,6 +63,24 @@ const Legend: React.FC = () => {
                                 transparent 5px,
                                 transparent 10px
                             )`,
+                            borderRadius: "2px"
+                        }}
+                    />
+                    <span>Non-Violent campaign</span>
+                </div>
+                <div style={{display: "flex", alignItems: "center", gap: "4px"}}>
+                    <div
+                        style={{
+                            width: "24px",
+                            height: "12px",
+                            backgroundColor: "#888888",
+                            backgroundImage: `repeating-linear-gradient(
+                                                45deg,
+                                                rgba(255, 255, 255, 0.7),
+                                                rgba(255, 255, 255, 0.7) 5px,
+                                                red 5px,
+                                                red 10px
+                                            )`,
                             borderRadius: "2px"
                         }}
                     />
