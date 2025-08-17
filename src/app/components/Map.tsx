@@ -79,7 +79,6 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
                 const groupsData = await groupsRes.json();
                 const groupIDSList = groupsData.map((group) => group?.groupid).filter(Boolean);
                 setGroupNameList(groupsData.map((group) => group?.groupname).filter(Boolean));
-                console.log(groupIDSList);
                 setGroupOfSelection(groupIDSList);
 
                 if (groupIDSList.length === 0) {
