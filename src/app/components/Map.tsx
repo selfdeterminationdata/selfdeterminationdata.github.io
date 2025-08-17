@@ -37,6 +37,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
     const [flag, setFlag] = React.useState(0);
     const [groupGeom, setGroupGeom] = React.useState<GeometryObj[] | null>(null);
     const [groupGeomToDisplay, setGroupGeomToDisplay] = React.useState<GeometryObj[] | null>(null);
+    const [groundNameList, setGroupNameList] = React.useState<String[] | null>([]);
     const [showStylePanel, setShowStylePanel] = React.useState(false);
     const mapRef = React.useRef<MaplibreMap | null>(null);
     const [polygonData, setPolygonData] = React.useState<GeoJSON.Geometry | null>(null);
@@ -77,6 +78,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
                 const groupsRes = await fetch(`${backendURL}/groups/country/${selection}`);
                 const groupsData = await groupsRes.json();
                 const groupIDSList = groupsData.map((group) => group?.groupid).filter(Boolean);
+                setGroupNameList(groupsData.map((group) => group?.groupname).filter(Boolean));
                 console.log(groupIDSList);
                 setGroupOfSelection(groupIDSList);
 
@@ -186,7 +188,9 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
                 type: "fill",
                 source: geomObj.groupName,
                 paint: {
-                    "fill-color": colorArray[groupGeom.findIndex((el) => el === geomObj) % 15],
+                    "fill-color": colorArray[
+                      groundNameList.findIndex((name) => name === geomObj.groupName) % 15
+                    ],
                     "fill-opacity": 0.6
                 }
             });
@@ -195,7 +199,9 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
                 type: "line",
                 source: geomObj.groupName,
                 paint: {
-                    "line-color": colorArray[groupGeom.findIndex((el) => el === geomObj) % 15],
+                    "line-color": colorArray[
+                                                        groundNameList.findIndex((name) => name === geomObj.groupName) % 15
+                                                      ],
                     "line-width": 3.5
                 }
             });

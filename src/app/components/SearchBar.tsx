@@ -16,21 +16,36 @@ const SearchBar: React.FC<SearchBarProps> = ({onSelect, onCountrySelect}) => {
     const [countriesList, setCountriesList] = useState<CountryOption[]>([]);
 
     useEffect(() => {
-        fetch(
-            "https://selfdeterminationdata-codebackend-19450166485.europe-west1.run.app/countries"
-        )
-            .then((response) => response.json())
-            .then((data) => {
-                const countryList = data.map((country) => ({
-                    key: country.ccode,
-                    label: country.countryname
+        if (countriesList.length > 0) return; // ✅ skip if we already have data
+
+        interface CountryApiResponse {
+            ccode: string;
+            countryname: string;
+        }
+
+        const fetchCountries = async () => {
+            try {
+                const res = await fetch(
+                    "https://selfdeterminationdata-codebackend-19450166485.europe-west1.run.app/countries"
+                );
+                if (!res.ok) {
+                    throw new Error(`Failed to fetch countries: ${res.status}`);
+                }
+                const data: CountryApiResponse[] = await res.json();
+
+                const countryList: CountryOption[] = data.map((c) => ({
+                    key: c.ccode,
+                    label: c.countryname
                 }));
+
                 setCountriesList(countryList);
-            })
-            .catch((error) => {
-                console.error("Error fetching countries:", error);
-            });
-    }, []);
+            } catch (err) {
+                console.error("Error fetching countries:", err);
+            }
+        };
+
+        fetchCountries();
+    }, [countriesList]);
 
     return (
         <div style={{display: "flex", justifyContent: "center", alignItems: "center"}}>

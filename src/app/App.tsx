@@ -11,6 +11,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./maplibre-fix.css";
 
+
 const loadTextFile = (filePath: string): Promise<string | undefined> => {
     return fetch(filePath)
         .then((response) => {
@@ -38,7 +39,7 @@ const App: React.FC = () => {
     const [overlayMode, setOverlayMode] = useState<"intro" | "about">("intro");
     const [specificRowSelection, setSpecificRow] = useState("");
     const [overlayText, setOverlayText] = useState<string>("");
-    const dataVerseLink = "https://dataverse.harvard.edu/dataverse/harvard";
+    const dataVerseLink = "https://doi.org/10.7910/DVN/VDSIH9";
 
     const handleMapClick = () => {
         setShowOverlay(false);
@@ -69,6 +70,23 @@ const App: React.FC = () => {
         }
     }, [overlayMode]);
 
+    useEffect(() => {
+        if (overlayMode !== "intro") return; // ✅ only active in intro mode
+
+        const handleClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName === "STRONG") {
+                const text = target.textContent?.toLowerCase();
+                if (text === "map") handleMapClick();
+                if (text === "about") handleAboutClick();
+                if (text === "download") handleDownloadClick();
+            }
+        };
+
+        document.addEventListener("click", handleClick);
+        return () => document.removeEventListener("click", handleClick);
+    }, [overlayMode]);
+
     return (
         <div
             style={{
@@ -95,8 +113,7 @@ const App: React.FC = () => {
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "center",
-                        alignItems: "center",
-                        textAlign: "center"
+                        alignItems: "center"
                     }}
                 >
                     <div
@@ -132,7 +149,7 @@ const App: React.FC = () => {
                             }}
                         />
                     </div>
-                    <h1 style={{marginBottom: "1rem"}}>
+                    <h1 style={{marginBottom: "1rem", textAlign: "center"}}>
                         {overlayMode === "intro" ? "SDM 2.0" : "About"}
                     </h1>
                     <div
@@ -144,20 +161,18 @@ const App: React.FC = () => {
                             marginBottom: "2rem",
                             padding: "1rem",
                             border: "1px solid rgba(255, 255, 255, 0.2)",
-                            borderRadius: "4px"
+                            borderRadius: "4px",
+                            textAlign: overlayMode === "intro" ? "center" : "left"
                         }}
                         dangerouslySetInnerHTML={{__html: overlayText}}
                     ></div>
                     <div style={{display: "flex", gap: "1rem"}}>
-                        <Button onClick={handleMapClick} startIcon={<MapIcon />} variant="outlined">
-                            Map
-                        </Button>
                         <Button
-                            onClick={handleDownloadClick}
-                            startIcon={<CloudDownloadIcon />}
+                            onClick={handleMapClick}
+                            startIcon={<MapIcon />}
                             variant="contained"
                         >
-                            Download
+                            Map
                         </Button>
                         <Button
                             onClick={handleAboutClick}
@@ -165,6 +180,13 @@ const App: React.FC = () => {
                             variant="outlined"
                         >
                             About
+                        </Button>
+                        <Button
+                            onClick={handleDownloadClick}
+                            startIcon={<CloudDownloadIcon />}
+                            variant="outlined"
+                        >
+                            Download
                         </Button>
                     </div>
                 </div>
