@@ -11,7 +11,6 @@ import InfoIcon from "@mui/icons-material/Info";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./maplibre-fix.css";
 
-
 const loadTextFile = (filePath: string): Promise<string | undefined> => {
     return fetch(filePath)
         .then((response) => {

@@ -13,11 +13,6 @@ interface RowData {
     highlightRanges: HighlightRange[];
 }
 
-interface groupAndColors{
-    groundID: string;
-    groupcolor: string;
-}
-
 interface GroupDataType {
     periodid?: number;
     minyear?: number;
@@ -73,23 +68,23 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     const [rowsGrid, setRowsGrid] = React.useState<RowData[]>([]);
     const [startYear, setStartYear] = React.useState(1945);
     const [endYear, setEndYear] = React.useState(2020);
-     const colorArray = [
-            "#1E3A8A", // dark blue
-            "#F59E0B", // orange
-            "#06B6D4", // cyan
-            "#EF4444", // red
-            "#84CC16", // lime green
-            "#EC4899", // pink
-            "#3B82F6", // bright blue
-            "#FACC15", // yellow
-            "#0D9488", // dark teal
-            "#D946EF", // purple
-            "#14B8A6", // teal
-            "#FB7185", // rose
-            "#6366F1", // indigo
-            "#10B981", // emerald green
-            "#8B5CF6" // violet
-        ];
+    const colorArray = [
+        "#1E3A8A", // dark blue
+        "#F59E0B", // orange
+        "#06B6D4", // cyan
+        "#EF4444", // red
+        "#84CC16", // lime green
+        "#EC4899", // pink
+        "#3B82F6", // bright blue
+        "#FACC15", // yellow
+        "#0D9488", // dark teal
+        "#D946EF", // purple
+        "#14B8A6", // teal
+        "#FB7185", // rose
+        "#6366F1", // indigo
+        "#10B981", // emerald green
+        "#8B5CF6" // violet
+    ];
     React.useEffect(() => {
         if (!groupsOfSelected || groupsOfSelected.length === 0) {
             return;
@@ -143,30 +138,32 @@ const GroupGrid: React.FC<GroupGridProps> = ({
             align: "left",
             renderCell: (params) => (
                 <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center", // vertical center
-                    width: "100%",
-                    height: "100%",
-                    padding: "0px 12px",
-                    boxSizing: "border-box",
-                    gap: "8px", // spacing between text and square
-                  }}
+                    style={{
+                        display: "flex",
+                        alignItems: "center", // vertical center
+                        width: "100%",
+                        height: "100%",
+                        padding: "0px 12px",
+                        boxSizing: "border-box",
+                        gap: "8px" // spacing between text and square
+                    }}
                 >
-                  {params.value}
-                 <div
-                   style={{
-                     width: "12px",
-                     height: "12px",
-                     borderRadius: "2px", // optional rounding
-                     backgroundColor: colorArray[
-                       (groupsOfSelected.map(Number).indexOf(Number(String(params.id).split("_")[0]))) % 15
-                     ],
-                     flexShrink: 0,
-                   }}
-                 />
+                    {params.value}
+                    <div
+                        style={{
+                            width: "12px",
+                            height: "12px",
+                            borderRadius: "2px", // optional rounding
+                            backgroundColor:
+                                colorArray[
+                                    groupsOfSelected
+                                        .map(Number)
+                                        .indexOf(Number(String(params.id).split("_")[0])) % 15
+                                ],
+                            flexShrink: 0
+                        }}
+                    />
                 </div>
-
             ),
             renderHeader: () => (
                 <div
