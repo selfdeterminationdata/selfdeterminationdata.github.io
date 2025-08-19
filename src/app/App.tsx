@@ -38,6 +38,8 @@ const App: React.FC = () => {
     const [overlayMode, setOverlayMode] = useState<"intro" | "about">("intro");
     const [specificRowSelection, setSpecificRow] = useState("");
     const [overlayText, setOverlayText] = useState<string>("");
+    const [startYear, setStartYear] = useState(1945);
+    const [endYear, setEndYear] = useState(2020);
     const dataVerseLink = "https://doi.org/10.7910/DVN/VDSIH9";
 
     const handleMapClick = () => {
@@ -202,12 +204,15 @@ const App: React.FC = () => {
                 <SearchBar
                     onSelect={setSearchSelection}
                     onCountrySelect={setSearchCountrySelection}
+                    setStartYear={setStartYear}
+                    setEndYear={setEndYear}
                 />
                 <MapDisplay
                     selection={searchSelection}
                     setGroupOfSelection={setGroupOfSelection}
                     yearSelected={yearSelected}
                     specificRow={specificRowSelection}
+                    endYear={endYear}
                 />
             </div>
 
@@ -233,6 +238,8 @@ const App: React.FC = () => {
                         setYearSelected={setYearSelected}
                         setSpecificRowSelection={setSpecificRow}
                         searchSelection={searchSelection}
+                        startYearProp={startYear}
+                        endYearProp={endYear}
                     />
                 )}
             </div>

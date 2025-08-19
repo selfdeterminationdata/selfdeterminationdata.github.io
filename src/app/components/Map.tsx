@@ -20,6 +20,7 @@ interface MapDisplayProps {
     setGroupOfSelection: (value: string[]) => void;
     yearSelected: number;
     specificRow: string;
+    endYear: number;
 }
 
 interface GeometryObj {
@@ -31,7 +32,8 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
     selection,
     setGroupOfSelection,
     yearSelected,
-    specificRow
+    specificRow,
+    endYear
 }) => {
     const [mapStyle, setMapStyle] = React.useState(MAP_STYLES.Streets);
     const [flag, setFlag] = React.useState(0);
@@ -68,7 +70,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
             try {
                 // --- Fetch polygon data ---
                 const polygonRes = await fetch(
-                    `${backendURL}/geometries/ccode/${selection}/${yearSelected}`
+                    `${backendURL}/geometries/ccode/${selection}/${endYear < yearSelected ? endYear : yearSelected}`
                 );
                 const polygonDataRes = await polygonRes.json();
                 const multipoly = polygonDataRes[0]?.multipoly;
@@ -88,7 +90,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
                 }
 
                 const groupGeomsRes = await fetch(
-                    `${backendURL}/geometries/groupIDS/${yearSelected}`,
+                    `${backendURL}/geometries/groupIDS/${endYear < yearSelected ? endYear : yearSelected}`,
                     {
                         method: "POST",
                         headers: {"Content-Type": "application/json"},
@@ -113,7 +115,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
         };
 
         fetchData();
-    }, [selection, yearSelected, setGroupOfSelection]);
+    }, [selection, yearSelected, setGroupOfSelection, endYear]);
 
     React.useEffect(() => {
         if (specificRow !== "") {

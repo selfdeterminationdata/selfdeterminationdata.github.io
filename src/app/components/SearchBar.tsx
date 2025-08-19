@@ -7,13 +7,30 @@ interface CountryOption {
     key: string;
 }
 
+interface CountryOptionWithYears {
+    label: string;
+    key: string;
+    startYear: number;
+    endYear: number;
+}
+
 interface SearchBarProps {
     onSelect: (value: string) => void;
     onCountrySelect: (value: string) => void;
+    setStartYear: (value: number) => void;
+    setEndYear: (value: number) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({onSelect, onCountrySelect}) => {
+const SearchBar: React.FC<SearchBarProps> = ({
+    onSelect,
+    onCountrySelect,
+    setStartYear,
+    setEndYear
+}) => {
     const [countriesList, setCountriesList] = useState<CountryOption[]>([]);
+    const [countriesListWithYears, setCountriesListWithYears] = useState<CountryOptionWithYears[]>(
+        []
+    );
 
     useEffect(() => {
         if (countriesList.length > 0) return; // ✅ skip if we already have data
@@ -21,6 +38,8 @@ const SearchBar: React.FC<SearchBarProps> = ({onSelect, onCountrySelect}) => {
         interface CountryApiResponse {
             ccode: string;
             countryname: string;
+            startYear: number;
+            endYear: number;
         }
 
         const fetchCountries = async () => {
@@ -38,7 +57,15 @@ const SearchBar: React.FC<SearchBarProps> = ({onSelect, onCountrySelect}) => {
                     label: c.countryname
                 }));
 
+                const countryListWithYears: CountryOptionWithYears[] = data.map((c) => ({
+                    key: c.ccode,
+                    label: c.countryname,
+                    startYear: c.startYear,
+                    endYear: c.endYear
+                }));
+
                 setCountriesList(countryList);
+                setCountriesListWithYears(countryListWithYears);
             } catch (err) {
                 console.error("Error fetching countries:", err);
             }
@@ -52,7 +79,12 @@ const SearchBar: React.FC<SearchBarProps> = ({onSelect, onCountrySelect}) => {
             <Autocomplete
                 disablePortal
                 options={countriesList}
-                onChange={(_, value) => {
+                onChange={(index, value) => {
+                    const selectedCountry = countriesListWithYears.find(
+                        (c) => c.key === value?.key
+                    );
+                    setStartYear(selectedCountry?.startYear);
+                    setEndYear(selectedCountry?.endYear);
                     onSelect(value ? value.key : "");
                     onCountrySelect(value ? value.label : "");
                 }}

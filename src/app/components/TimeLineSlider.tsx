@@ -38,7 +38,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
     scrollLeft,
     onScrollLeftChange
 }) => {
-    const [value, setValue] = useState<number>(initialValue);
+    const [value, setValue] = useState<number>(disable ? initialValue : 2020);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
     const [showRightArrow, setShowRightArrow] = useState(true);
@@ -78,13 +78,14 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
         }
     }, [onScrollLeftChange]);
 
-    // Smoothly animate scroll with easing
+    // Smooth scroll with easing
     const animateScrollTo = (target: number) => {
         const el = scrollContainerRef.current;
         if (!el) return;
 
         if (scrollEaseFrame.current) {
             cancelAnimationFrame(scrollEaseFrame.current);
+            scrollEaseFrame.current = null;
         }
 
         const start = el.scrollLeft;
@@ -95,20 +96,31 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
         const startTime = performance.now();
         currentTargetScroll.current = target;
 
-        const easeInOutQuad = (t: number) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+        const easeInOutQuad = (t: number) =>
+            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 
         const step = (time: number) => {
+            // 🔑 check if target changed (user scrolled manually or new animateScrollTo was called)
+            if (currentTargetScroll.current !== target) {
+                // stop this animation early
+                scrollEaseFrame.current = null;
+                return;
+            }
+
             const progress = Math.min((time - startTime) / duration, 1);
             el.scrollLeft = start + distance * easeInOutQuad(progress);
+
             if (progress < 1) {
                 scrollEaseFrame.current = requestAnimationFrame(step);
+            } else {
+                scrollEaseFrame.current = null;
             }
         };
 
         scrollEaseFrame.current = requestAnimationFrame(step);
     };
 
-    // When parent changes scrollLeft
+    // Sync when parent changes scrollLeft
     useEffect(() => {
         const el = scrollContainerRef.current;
         if (!el) return;
@@ -129,6 +141,24 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
             if (scrollEaseFrame.current) cancelAnimationFrame(scrollEaseFrame.current);
         };
     }, [handleScroll]);
+
+    // 🔑 On mount: if disable = false, auto-scroll so 2020 is visible
+    useEffect(() => {
+        if (disable) return;
+        const el = scrollContainerRef.current;
+        if (!el) return;
+
+        const totalYears = endYear - startYear;
+        const scrollableWidth = el.scrollWidth;
+        const containerWidth = el.clientWidth;
+
+        const thumbLeft = ((2020 - startYear) / totalYears) * scrollableWidth;
+        let targetScroll = thumbLeft - containerWidth / 2;
+        targetScroll = Math.max(0, Math.min(el.scrollWidth - containerWidth, targetScroll));
+
+        el.scrollLeft = targetScroll; // jump immediately
+        onScrollLeftChange(targetScroll); // sync with parent
+    }, [disable, startYear, endYear, onScrollLeftChange]);
 
     const marks = [];
     for (let year = startYear; year <= endYear; year++) {
@@ -198,7 +228,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                         {highlightRanges?.map((range, index) => {
                             const left = ((range.from - startYear) / (endYear - startYear)) * 100;
                             const widthBar =
-                                range.to !== 2020
+                                range.to !== endYear
                                     ? ((range.to - range.from + 1) / (endYear - startYear)) * 100
                                     : ((range.to - range.from) / (endYear - startYear)) * 100;
 
@@ -220,12 +250,12 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                           red 20px
                         )`
                                             : `repeating-linear-gradient(
-                                                                        45deg,
-                                                                        rgba(255, 255, 255, 0.7) 0,
-                                                                        rgba(255, 255, 255, 0.7) 5px,
-                                                                        transparent 10px,
-                                                                        transparent 20px
-                                                                      )`,
+                          45deg,
+                          rgba(255, 255, 255, 0.7) 0,
+                          rgba(255, 255, 255, 0.7) 5px,
+                          transparent 10px,
+                          transparent 20px
+                        )`,
                                         borderRadius: "3px"
                                     }}
                                 />
@@ -235,36 +265,50 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
 
                     <Slider
                         disabled={disable}
+                        slots={{
+                            thumb: disable ? () => null : undefined
+                        }}
                         value={value}
                         min={startYear}
                         max={endYear}
                         step={1}
                         marks={marks}
                         onChange={(_, newValue) => {
-                            if (typeof newValue !== "number") return;
+                            if (typeof newValue === "number") {
+                                setValue(newValue);
+                                handleChangeHelper?.(newValue);
 
-                            setValue(newValue);
-                            handleChangeHelper?.(newValue);
+                                const el = scrollContainerRef.current;
+                                if (el) {
+                                    const containerWidth = el.clientWidth;
+                                    const thumbLeft =
+                                        ((newValue - startYear) / (endYear - startYear)) *
+                                        el.scrollWidth;
 
-                            const el = scrollContainerRef.current;
-                            if (!el) return;
+                                    const padding = 100;
 
-                            const totalYears = endYear - startYear;
-                            const scrollableWidth = el.scrollWidth;
-                            const containerWidth = el.clientWidth;
-                            const thumbLeft =
-                                ((newValue - startYear) / totalYears) * scrollableWidth;
-                            const padding = 40;
+                                    // Guard against parent re-sync while we're animating
+                                    isSyncingFromParent.current = true;
 
-                            if (thumbLeft < el.scrollLeft + padding) {
-                                animateScrollTo(Math.max(0, thumbLeft - padding));
-                            } else if (thumbLeft > el.scrollLeft + containerWidth - padding) {
-                                animateScrollTo(
-                                    Math.min(
-                                        el.scrollWidth - containerWidth,
-                                        thumbLeft - containerWidth + padding
-                                    )
-                                );
+                                    if (thumbLeft < el.scrollLeft + padding) {
+                                        animateScrollTo(Math.max(0, thumbLeft - padding));
+                                    } else if (
+                                        thumbLeft >
+                                        el.scrollLeft + containerWidth - padding
+                                    ) {
+                                        animateScrollTo(
+                                            Math.min(
+                                                el.scrollWidth - containerWidth,
+                                                thumbLeft - containerWidth + padding
+                                            )
+                                        );
+                                    }
+
+                                    // Release guard after animation finishes
+                                    setTimeout(() => {
+                                        isSyncingFromParent.current = false;
+                                    }, 500);
+                                }
                             }
                         }}
                         valueLabelDisplay="auto"

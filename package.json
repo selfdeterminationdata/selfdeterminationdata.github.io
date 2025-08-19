@@ -11,7 +11,6 @@
     "lint": "eslint './src/app/**/*.{ts,tsx,js,jsx}'",
     "lint:fix": "eslint './src/app/**/*.{ts,tsx,js,jsx}' --fix"
   },
-  "homepage": "https://selfdeterminationdata.github.io",
   "devDependencies": {
     "@types/node": "22.15.22",
     "@types/react": "19.1.6",

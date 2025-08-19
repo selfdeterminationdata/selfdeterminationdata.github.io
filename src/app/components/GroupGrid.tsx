@@ -24,14 +24,6 @@ interface GroupDataType {
     geoid?: number;
     groupname?: string | null;
 }
-function getYearBounds(ranges: HighlightRange[]): {startYear: number; endYear: number} | null {
-    if (!ranges || ranges.length === 0) return null;
-
-    const startYear = Math.min(...ranges.map((r) => r.from));
-    const endYear = Math.max(...ranges.map((r) => r.to));
-
-    return {startYear, endYear};
-}
 
 const generateRowProps = (rowsArray: RowData[]): RowData[] => {
     const rowProps: RowData[] = [];
@@ -57,17 +49,21 @@ interface GroupGridProps {
     setYearSelected: (value: number) => void;
     setSpecificRowSelection: (value: string) => void;
     searchSelection: string | null;
+    startYearProp: number;
+    endYearProp: number;
 }
 
 const GroupGrid: React.FC<GroupGridProps> = ({
     groupsOfSelected,
     setYearSelected,
     setSpecificRowSelection,
-    searchSelection
+    searchSelection,
+    startYearProp,
+    endYearProp
 }) => {
     const [rowsGrid, setRowsGrid] = React.useState<RowData[]>([]);
-    const [startYear, setStartYear] = React.useState(1945);
-    const [endYear, setEndYear] = React.useState(2020);
+    const startYear = startYearProp > 1945 ? startYearProp : 1945;
+    const endYear = endYearProp < 2020 ? endYearProp : 2020;
     const colorArray = [
         "#1E3A8A", // dark blue
         "#F59E0B", // orange
@@ -114,10 +110,6 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                         }
                     ]
                 }));
-                const allHighlightRanges = rowsData.flatMap((row) => row.highlightRanges);
-                const bounds = getYearBounds(allHighlightRanges);
-                setStartYear(bounds?.startYear ?? 1945);
-                setEndYear(bounds?.endYear ?? 2020);
                 setRowsGrid(generateRowProps(rowsData));
                 setSpecificRowSelection("");
             })
@@ -235,6 +227,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     return (
         <div key={searchSelection} style={{height: "27vh", width: "100%"}}>
             <DataGrid
+                key={searchSelection}
                 rows={rowsGrid}
                 columns={columns}
                 hideFooter
