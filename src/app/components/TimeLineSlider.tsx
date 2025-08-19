@@ -76,7 +76,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                 onScrollLeftChange(el.scrollLeft);
             });
         }
-    }, [onScrollLeftChange]); // add dependencies used inside the function
+    }, [onScrollLeftChange]);
 
     // Smoothly animate scroll with easing
     const animateScrollTo = (target: number) => {
