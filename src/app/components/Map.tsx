@@ -87,7 +87,6 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
                     return;
                 }
 
-                // --- Fetch group geometries ---
                 const groupGeomsRes = await fetch(
                     `${backendURL}/geometries/groupIDS/${yearSelected}`,
                     {
