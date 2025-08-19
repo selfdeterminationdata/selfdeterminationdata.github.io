@@ -61,7 +61,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
     const scrollEaseFrame = useRef<number | null>(null);
     const currentTargetScroll = useRef<number | null>(null);
 
-    const handleScroll = () => {
+    const handleScroll = useCallback(() => {
         const el = scrollContainerRef.current;
         if (!el) return;
 
@@ -76,7 +76,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                 onScrollLeftChange(el.scrollLeft);
             });
         }
-    };
+    }, [onScrollLeftChange]); // add dependencies used inside the function
 
     // Smoothly animate scroll with easing
     const animateScrollTo = (target: number) => {
@@ -128,7 +128,7 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
             if (scrollAnimationFrame.current) cancelAnimationFrame(scrollAnimationFrame.current);
             if (scrollEaseFrame.current) cancelAnimationFrame(scrollEaseFrame.current);
         };
-    }, []);
+    }, [handleScroll]);
 
     const marks = [];
     for (let year = startYear; year <= endYear; year++) {
