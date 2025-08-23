@@ -204,9 +204,9 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                     mx: 6,
                     position: "relative",
                     ...(disable && {
-                                scrollbarWidth: "none",
-                                "&::-webkit-scrollbar": { display: "none" }
-                              })
+                        scrollbarWidth: "none",
+                        "&::-webkit-scrollbar": {display: "none"}
+                    })
                 }}
             >
                 <Box
