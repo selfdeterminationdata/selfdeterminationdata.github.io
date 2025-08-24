@@ -5,11 +5,13 @@ import TimeLineSlider from "./TimeLineSlider";
 interface HighlightRange {
     from: number;
     to: number;
+    claim?: string | null;
+    violence?: boolean | null;
 }
 
 interface RowData {
-    id: number;
-    name: string;
+    id: string; // changed from number because we concatenate groupid + groupname
+    name: string | null;
     highlightRanges: HighlightRange[];
 }
 
@@ -64,6 +66,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     const [rowsGrid, setRowsGrid] = React.useState<RowData[]>([]);
     const startYear = startYearProp > 1945 ? startYearProp : 1945;
     const endYear = endYearProp < 2020 ? endYearProp : 2020;
+
     const colorArray = [
         "#1E3A8A", // dark blue
         "#F59E0B", // orange
@@ -81,6 +84,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
         "#10B981", // emerald green
         "#8B5CF6" // violet
     ];
+
     React.useEffect(() => {
         if (!groupsOfSelected || groupsOfSelected.length === 0) {
             return;
@@ -103,8 +107,8 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                     name: groupData?.groupname,
                     highlightRanges: [
                         {
-                            from: groupData?.minyear,
-                            to: groupData?.maxyear,
+                            from: groupData?.minyear ?? startYear,
+                            to: groupData?.maxyear ?? endYear,
                             claim: groupData?.claim,
                             violence: groupData?.violent
                         }
@@ -114,13 +118,14 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                 setSpecificRowSelection("");
             })
             .catch((err) => console.error("Error fetching data:", err));
-    }, [groupsOfSelected, setSpecificRowSelection]);
+    }, [groupsOfSelected, setSpecificRowSelection, startYear, endYear]);
 
-    const totalYears = endYear - startYear; // e.g., 2020 - 1945 = 75
-    const pixelsPerYear = 30; // as in your Box width calculation
-    const containerVisibleWidth = 600; // your minWidth or actual container width
+    const totalYears = endYear - startYear;
+    const pixelsPerYear = 30;
+    const containerVisibleWidth = 600;
     const initialScrollLeft = totalYears * pixelsPerYear - containerVisibleWidth;
     const [scrollLeft, setScrollLeft] = React.useState(initialScrollLeft);
+
     const columns: GridColDef[] = [
         {
             field: "name",
@@ -132,45 +137,50 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                 <div
                     style={{
                         display: "flex",
-                        alignItems: "center", // vertical center
-                        width: "100%",
-                        height: "100%",
-                        padding: "0px 12px",
-                        boxSizing: "border-box",
-                        gap: "8px" // spacing between text and square
-                    }}
-                >
-                    {params.value}
-                    <div
-                        style={{
-                            width: "12px",
-                            height: "12px",
-                            borderRadius: "2px", // optional rounding
-                            backgroundColor:
-                                colorArray[
-                                    groupsOfSelected
-                                        .map(Number)
-                                        .indexOf(Number(String(params.id).split("_")[0])) % 15
-                                ],
-                            flexShrink: 0
-                        }}
-                    />
-                </div>
-            ),
-            renderHeader: () => (
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center", // vertical center
+                        alignItems: "center",
                         width: "100%",
                         height: "100%",
                         padding: "0px 12px",
                         boxSizing: "border-box"
                     }}
                 >
-                    Year selection
+                    {params.value}
                 </div>
             )
+        },
+        {
+            field: "color",
+            headerName: "Color scheme",
+            width: 120,
+            headerAlign: "center",
+            align: "center",
+            sortable: false,
+            renderCell: (params) => {
+                const groupId = Number(String(params.id).split("_")[0]);
+                const color = colorArray[groupsOfSelected!.map(Number).indexOf(groupId) % 15];
+
+                return (
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center", // centers horizontally
+                            alignItems: "center", // centers vertically
+                            width: "100%",
+                            height: "100%"
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: "16px",
+                                height: "16px",
+                                borderRadius: "2px",
+                                backgroundColor: color,
+                                flexShrink: 0
+                            }}
+                        />
+                    </div>
+                );
+            }
         },
         {
             field: "description",
@@ -235,7 +245,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                 disableColumnMenu
                 onRowSelectionModelChange={(params) => {
                     setSpecificRowSelection(
-                        Array.from(params?.ids).length == 1
+                        Array.from(params?.ids).length === 1
                             ? String(Array.from(params?.ids)[0])?.split("_")[1]
                             : ""
                     );
