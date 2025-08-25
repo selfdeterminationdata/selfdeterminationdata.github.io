@@ -235,14 +235,27 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     ];
 
     return (
-        <div key={searchSelection} style={{height: "27vh", width: "100%"}}>
+        <div key={searchSelection} style={{height: "27vh", width: "100%", overflowX: "auto"}}>
             <DataGrid
                 key={searchSelection}
                 rows={rowsGrid}
                 columns={columns}
                 hideFooter
-                getRowHeight={() => "auto"}
+                getRowHeight={() => "auto"} // rows grow to fit content
                 disableColumnMenu
+                autoHeight // grid adjusts height to content
+                sx={{
+                    minWidth: 600, // optional: prevent shrinking too much
+                    "& .MuiDataGrid-cell": {
+                        whiteSpace: "normal", // allow text wrap in cells
+                        wordBreak: "break-word",
+                        py: 0.5 // reduce padding for small screens
+                    },
+                    "& .MuiDataGrid-columnHeaders": {
+                        whiteSpace: "normal",
+                        wordBreak: "break-word"
+                    }
+                }}
                 onRowSelectionModelChange={(params) => {
                     setSpecificRowSelection(
                         Array.from(params?.ids).length === 1

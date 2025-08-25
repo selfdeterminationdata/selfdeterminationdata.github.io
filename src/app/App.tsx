@@ -117,78 +117,114 @@ const App: React.FC = () => {
                         alignItems: "center"
                     }}
                 >
+                    <div className="header">
+                        <img src="/uniofbath.png" alt="University of Bath" className="logo" />
+                        <img src="/councillogo.png" alt="Council Logo" className="logo" />
+                    </div>
+
+                    <style>
+                        {`
+                      .header {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        padding: 10px 20px;
+                        z-index: 1000;
+                      }
+
+                      .logo {
+                        background-color: #fff;
+                        padding: 8px;
+                        border-radius: 4px;
+                        max-width: 200px; /* works on desktop */
+                        width: 100%;
+                        height: auto;
+                      }
+
+                      /* Mobile: stack logos vertically */
+                      @media (max-width: 768px) {
+                        .header {
+                          flex-direction: column;
+                          align-items: center;
+                        }
+
+                        .logo {
+                          max-width: 150px; /* shrink a bit for mobile */
+                          margin-bottom: 10px;
+                        }
+                      }
+                    `}
+                    </style>
                     <div
                         style={{
                             position: "fixed",
-                            top: 0,
+                            top: "80px", // push down so it clears logos (adjust based on logo height)
                             left: 0,
                             right: 0,
+                            bottom: 0,
                             display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                            padding: "10px 20px",
-                            zIndex: 1000
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: "1rem",
+                            boxSizing: "border-box"
                         }}
                     >
-                        <img
-                            src={"/uniofbath.png"}
-                            alt="University of Bath"
+                        <h1 style={{marginBottom: "1rem", textAlign: "center"}}>
+                            {overlayMode === "intro" ? "SDM 2.0" : "About"}
+                        </h1>
+
+                        {/* Scrollable text box */}
+                        <div
                             style={{
-                                backgroundColor: "#fff",
-                                padding: "8px",
+                                maxWidth: "80vw",
+                                maxHeight: "65vh",
+                                overflow: "auto",
+                                whiteSpace: "pre-wrap",
+                                marginBottom: "2rem",
+                                padding: "1rem",
+                                border: "1px solid rgba(255, 255, 255, 0.2)",
                                 borderRadius: "4px",
-                                width: "200px"
+                                textAlign: overlayMode === "intro" ? "center" : "left"
                             }}
-                        />
-                        <img
-                            src={"/councillogo.png"}
-                            alt="University of Bath"
+                            dangerouslySetInnerHTML={{__html: overlayText}}
+                        ></div>
+                        {/* Sticky button bar */}
+                        <div
                             style={{
-                                backgroundColor: "#fff",
-                                padding: "8px",
-                                width: "200px"
+                                display: "flex",
+                                gap: "1rem",
+                                justifyContent: "center",
+                                flexWrap: "wrap", // wraps buttons on small screens
+                                padding: "0.5rem"
                             }}
-                        />
-                    </div>
-                    <h1 style={{marginBottom: "1rem", textAlign: "center"}}>
-                        {overlayMode === "intro" ? "SDM 2.0" : "About"}
-                    </h1>
-                    <div
-                        style={{
-                            maxWidth: "80vw",
-                            maxHeight: "65vh",
-                            overflow: "auto",
-                            whiteSpace: "pre-wrap",
-                            marginBottom: "2rem",
-                            padding: "1rem",
-                            border: "1px solid rgba(255, 255, 255, 0.2)",
-                            borderRadius: "4px",
-                            textAlign: overlayMode === "intro" ? "center" : "left"
-                        }}
-                        dangerouslySetInnerHTML={{__html: overlayText}}
-                    ></div>
-                    <div style={{display: "flex", gap: "1rem"}}>
-                        <Button
-                            onClick={handleMapClick}
-                            startIcon={<MapIcon />}
-                            variant="contained"
                         >
-                            Map
-                        </Button>
-                        <Button
-                            onClick={handleAboutClick}
-                            startIcon={<InfoIcon />}
-                            variant="outlined"
-                        >
-                            About
-                        </Button>
-                        <Button
-                            onClick={handleDownloadClick}
-                            startIcon={<CloudDownloadIcon />}
-                            variant="outlined"
-                        >
-                            Download
-                        </Button>
+                            <Button
+                                onClick={handleMapClick}
+                                startIcon={<MapIcon />}
+                                variant="contained"
+                            >
+                                Map
+                            </Button>
+                            <Button
+                                onClick={handleAboutClick}
+                                startIcon={<InfoIcon />}
+                                variant="outlined"
+                            >
+                                About
+                            </Button>
+                            <Button
+                                onClick={handleDownloadClick}
+                                startIcon={<CloudDownloadIcon />}
+                                variant="outlined"
+                            >
+                                Download
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -219,11 +255,15 @@ const App: React.FC = () => {
             {searchSelection && (
                 <div
                     style={{
-                        height: "50px",
                         display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center"
+                        flexDirection: "row", // always row
+                        justifyContent: "flex-start", // align items at start
+                        alignItems: "center",
+                        height: "50px",
+                        gap: "0.5rem",
+                        overflowX: "auto", // horizontal scroll
+                        whiteSpace: "nowrap", // prevent wrapping
+                        padding: "0.5rem 0" // optional padding
                     }}
                 >
                     <Legend />
