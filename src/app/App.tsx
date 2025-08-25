@@ -162,7 +162,7 @@ const App: React.FC = () => {
                     <div
                         style={{
                             position: "fixed",
-                            top: "80px", // push down so it clears logos (adjust based on logo height)
+                            top: "120px", // push down so it clears logos (adjust based on logo height)
                             left: 0,
                             right: 0,
                             bottom: 0,
