@@ -254,20 +254,22 @@ const App: React.FC = () => {
 
             {searchSelection && (
                 <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "row", // always row
-                        justifyContent: "flex-start", // align items at start
-                        alignItems: "center",
-                        height: "50px",
-                        gap: "0.5rem",
-                        overflowX: "auto", // horizontal scroll
-                        whiteSpace: "nowrap", // prevent wrapping
-                        padding: "0.5rem 0" // optional padding
-                    }}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row", // always row
+                    justifyContent: "flex-start", // align items at start
+                    alignItems: "center",
+                    height: "50px",
+                    gap: "0.5rem",
+                    overflowX: "auto", // horizontal scroll
+                    whiteSpace: "nowrap", // prevent wrapping
+                    padding: "0.5rem 0" // optional padding
+                  }}
                 >
-                    <Legend />
+                  <Legend />
+                  <div style={{ marginLeft: "auto" }}>
                     <FileDownloadIcon searchSelection={searchCountrySelection} />
+                  </div>
                 </div>
             )}
 
