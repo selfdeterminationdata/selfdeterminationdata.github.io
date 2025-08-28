@@ -248,18 +248,12 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
                                         backgroundImage: range?.violence
                                             ? `repeating-linear-gradient(
                           45deg,
-                          rgba(255, 0, 0, 0.7) 0,
-                          rgba(255, 0, 0, 0.7) 5px,
-                          transparent 10px,
-                          transparent 20px
-                        )`
-                                            : `repeating-linear-gradient(
-                          45deg,
                           rgba(255, 255, 255, 0.7) 0,
                           rgba(255, 255, 255, 0.7) 5px,
                           transparent 10px,
                           transparent 20px
-                        )`,
+                        )`
+                                            : "none",
                                         borderRadius: "3px"
                                     }}
                                 />

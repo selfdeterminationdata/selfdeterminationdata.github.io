@@ -146,11 +146,25 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                 >
                     {params.value}
                 </div>
+            ),
+            renderHeader: (params) => (
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        width: "100%",
+                        height: "100%",
+                        padding: "0px 12px",
+                        boxSizing: "border-box"
+                    }}
+                >
+                    {params.colDef.headerName}
+                </div>
             )
         },
         {
             field: "color",
-            headerName: "Color scheme",
+            headerName: "",
             width: 120,
             headerAlign: "center",
             align: "center",

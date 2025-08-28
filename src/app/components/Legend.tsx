@@ -56,17 +56,10 @@ const Legend: React.FC = () => {
                             width: "24px",
                             height: "12px",
                             backgroundColor: "#888888",
-                            backgroundImage: `repeating-linear-gradient(
-                                45deg,
-                                rgba(255, 255, 255, 0.7),
-                                rgba(255, 255, 255, 0.7) 5px,
-                                transparent 5px,
-                                transparent 10px
-                            )`,
                             borderRadius: "2px"
                         }}
                     />
-                    <span>Non-Violent campaign</span>
+                    <span>Non-violent campaign</span>
                 </div>
                 <div style={{display: "flex", alignItems: "center", gap: "4px"}}>
                     <div
@@ -78,8 +71,8 @@ const Legend: React.FC = () => {
                                                 45deg,
                                                 rgba(255, 255, 255, 0.7),
                                                 rgba(255, 255, 255, 0.7) 5px,
-                                                red 5px,
-                                                red 10px
+                                                transparent 5px,
+                                                transparent 10px
                                             )`,
                             borderRadius: "2px"
                         }}

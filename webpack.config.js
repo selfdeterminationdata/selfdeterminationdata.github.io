@@ -17,7 +17,7 @@ module.exports = (env) => ({
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "build.js",
-    publicPath: "./", // ensures assets load correctly
+    publicPath: "/", // ensures assets load correctly
     clean: true, // clears dist/ before build
   },
   module: {
