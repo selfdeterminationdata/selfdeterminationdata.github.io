@@ -217,7 +217,7 @@ const GroupGrid: React.FC<GroupGridProps> = ({
                         height="60px"
                         startYear={startYear}
                         endYear={endYear}
-                        disable={true}
+                        disabled={true}
                         backgroundColor="grey"
                         highlightRanges={params.row.highlightRanges}
                         scrollLeft={scrollLeft}
@@ -249,17 +249,30 @@ const GroupGrid: React.FC<GroupGridProps> = ({
     ];
 
     return (
-        <div key={searchSelection} style={{height: "27vh", width: "100%", overflowX: "auto"}}>
+        <div
+            key={searchSelection}
+            style={{
+                height: "27vh",
+                width: "100%",
+                overflowX: "auto",
+                WebkitOverflowScrolling: "touch"
+            }}
+        >
             <DataGrid
                 key={searchSelection}
                 rows={rowsGrid}
                 columns={columns}
+                initialState={{
+                    sorting: {
+                        sortModel: [{field: "name", sort: "asc"}] // asc = A→Z, desc = Z→A
+                    }
+                }}
                 hideFooter
                 getRowHeight={() => "auto"} // rows grow to fit content
                 disableColumnMenu
                 autoHeight // grid adjusts height to content
                 sx={{
-                    minWidth: 600, // optional: prevent shrinking too much
+                    minWidth: 1400, // optional: prevent shrinking too much
                     "& .MuiDataGrid-cell": {
                         whiteSpace: "normal", // allow text wrap in cells
                         wordBreak: "break-word",
