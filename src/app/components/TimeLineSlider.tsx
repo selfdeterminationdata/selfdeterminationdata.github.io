@@ -172,22 +172,57 @@ const TimeLineSlider: React.FC<TimeLineSliderProps> = ({
         marks.push({value: year, ...(year % 5 === 0 && {label: `${year}`})});
     }
 
+    /** Scroll one year left or right */
     const scrollOneYear = (direction: "left" | "right") => {
-        if (disabled) return; // prevent manual scroll
+        if (disabled) return; // prevent scrolling if disabled
         const el = scrollContainerRef.current;
         if (!el) return;
 
+        // Get inner track element (slider + highlight overlay)
+        const track = el.firstElementChild as HTMLElement | null;
+        if (!track) return;
+
         const totalYears = endYear - startYear;
-        const scrollableWidth = el.scrollWidth;
-        const oneYearScroll = scrollableWidth / totalYears;
+        const oneYearScroll = track.offsetWidth / totalYears;
 
         let target =
             (currentTargetScroll.current ?? el.scrollLeft) +
             (direction === "left" ? -oneYearScroll : oneYearScroll);
 
         target = Math.max(0, Math.min(el.scrollWidth - el.clientWidth, target));
-        animateScrollTo(target);
+
+        // Smooth scroll
+        const start = el.scrollLeft;
+        const distance = target - start;
+        const duration = 300;
+        const startTime = performance.now();
+
+        const easeInOutQuad = (t: number) =>
+            t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+        const step = (time: number) => {
+            const progress = Math.min((time - startTime) / duration, 1);
+            el.scrollLeft = start + distance * easeInOutQuad(progress);
+            if (progress < 1) requestAnimationFrame(step);
+        };
+
+        requestAnimationFrame(step);
     };
+
+    /** Show chevrons only when scrollable */
+    useEffect(() => {
+        const el = scrollContainerRef.current;
+        if (!el) return;
+
+        const updateArrows = () => {
+            setShowLeftArrow(el.scrollLeft > 0);
+            setShowRightArrow(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+        };
+
+        updateArrows();
+        el.addEventListener("scroll", updateArrows);
+        return () => el.removeEventListener("scroll", updateArrows);
+    }, []);
 
     return (
         <Box width={width} height={height} display="flex" alignItems="center" position="relative">
